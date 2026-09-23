@@ -1,0 +1,231 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Expo app",
+			"type": "shell",
+			"command": "npx expo start --web --clear",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Start Expo app 8082",
+			"type": "shell",
+			"command": "npx expo start --web --clear --port 8082",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check Android USB device",
+			"type": "shell",
+			"command": "adb devices",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Locate Android build tools",
+			"type": "shell",
+			"command": "$candidates=@(\"$env:LOCALAPPDATA\\Android\\Sdk\\platform-tools\\adb.exe\",\"$env:ANDROID_HOME\\platform-tools\\adb.exe\",\"$env:ANDROID_SDK_ROOT\\platform-tools\\adb.exe\"); $candidates | Where-Object { Test-Path $_ }",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Locate Android build tools",
+			"type": "shell",
+			"command": "$candidates=@((Join-Path $env:LOCALAPPDATA 'Android\\Sdk\\platform-tools\\adb.exe'),(Join-Path $env:ANDROID_HOME 'platform-tools\\adb.exe'),(Join-Path $env:ANDROID_SDK_ROOT 'platform-tools\\adb.exe')); $candidates | Where-Object { Test-Path $_ }",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Find adb executable",
+			"type": "shell",
+			"command": "where.exe adb",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Android SDK setup",
+			"type": "shell",
+			"command": "Write-Output \"ANDROID_HOME=$env:ANDROID_HOME\"; Write-Output \"ANDROID_SDK_ROOT=$env:ANDROID_SDK_ROOT\"; Get-ChildItem \"$env:LOCALAPPDATA\\Android\" -ErrorAction SilentlyContinue | Select-Object FullName",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check platform tools directly",
+			"type": "shell",
+			"command": "Test-Path 'C:\\Users\\www\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe'; Get-ChildItem 'C:\\Users\\www\\AppData\\Local\\Android\\Sdk' -Directory | Select-Object Name",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check connected Android device",
+			"type": "shell",
+			"command": "& 'C:\\Users\\www\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe' devices -l",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build and install Android APK",
+			"type": "shell",
+			"command": "$env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android --device 79YHPBBIJJ65OFDU",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build and install Android app",
+			"type": "shell",
+			"command": "$env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build and install Android APK no bundler",
+			"type": "shell",
+			"command": "$env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android --no-bundler",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Find working Java runtime",
+			"type": "shell",
+			"command": "Get-ChildItem 'C:\\Program Files\\Java' -Directory -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem 'C:\\Program Files\\Eclipse Adoptium' -Directory -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem 'C:\\Program Files\\Android Studio' -Directory -ErrorAction SilentlyContinue | Select-Object FullName; java -version",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build APK with Java 17",
+			"type": "shell",
+			"command": "$env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android --no-bundler",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect Gradle wrapper jar",
+			"type": "shell",
+			"command": "Get-Item 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن\\hasan_platform\\android\\gradle\\wrapper\\gradle-wrapper.jar' | Select-Object FullName,Length; Get-Command gradle -ErrorAction SilentlyContinue | Select-Object Source",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Read Gradle wrapper size",
+			"type": "shell",
+			"command": "(Get-Item 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن\\hasan_platform\\android\\gradle\\wrapper\\gradle-wrapper.jar').Length",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build APK from ASCII path",
+			"type": "shell",
+			"command": "subst H: 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن'; Set-Location 'H:\\hasan_platform'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android --no-bundler",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Regenerate Android native project",
+			"type": "shell",
+			"command": "subst H: 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن'; Set-Location 'H:\\hasan_platform'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo prebuild --clean --platform android --non-interactive",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build and install regenerated APK",
+			"type": "shell",
+			"command": "subst H: 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن'; Set-Location 'H:\\hasan_platform'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android --no-bundler",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Get ASCII short project path",
+			"type": "shell",
+			"command": "cmd /c \"for %I in (\\\"C:\\Users\\www\\Desktop\\منصه البشمهندس حسن\\\") do @echo %~sI\"",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Get ASCII short project path",
+			"type": "shell",
+			"command": "cmd /c \"for %I in (C:\\Users\\www\\Desktop\\*) do @echo %~sI\"",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "List DOS short names",
+			"type": "shell",
+			"command": "cmd /c dir /x C:\\Users\\www\\Desktop",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build APK using DOS short path",
+			"type": "shell",
+			"command": "Set-Location 'C:\\Users\\www\\Desktop\\5A39~1\\hasan_platform'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo run:android --no-bundler",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Assemble Android debug APK directly",
+			"type": "shell",
+			"command": "Set-Location 'C:\\Users\\www\\Desktop\\5A39~1\\hasan_platform'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; & '.\\android\\gradlew.bat' app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeArchitectures=arm64-v8a",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Copy project to ASCII build path",
+			"type": "shell",
+			"command": "if (Test-Path 'C:\\hassan_build') { Write-Output 'C:\\hassan_build already exists'; exit 0 }; robocopy 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن\\hasan_platform' 'C:\\hassan_build' /E /XD .git .expo android /XF '*.log' /NFL /NDL /NJH /NJS /NP; if ($LASTEXITCODE -lt 8) { exit 0 } else { exit $LASTEXITCODE }",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Generate and build APK in ASCII path",
+			"type": "shell",
+			"command": "Set-Location 'C:\\hassan_build'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo prebuild --platform android; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '.\\android\\gradlew.bat' app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeArchitectures=arm64-v8a",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect Expo plugin dependency",
+			"type": "shell",
+			"command": "Test-Path 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن\\hasan_platform\\node_modules\\@expo\\config-plugins\\build\\android'; Test-Path 'C:\\hassan_build\\node_modules\\@expo\\config-plugins\\build\\android'; Get-ChildItem 'C:\\hassan_build\\node_modules\\@expo\\config-plugins\\build' -Directory | Select-Object Name",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Complete Android dependencies copy",
+			"type": "shell",
+			"command": "robocopy 'C:\\Users\\www\\Desktop\\منصه البشمهندس حسن\\hasan_platform\\node_modules' 'C:\\hassan_build\\node_modules' /E /NFL /NDL /NJH /NJS /NP; if ($LASTEXITCODE -lt 8) { exit 0 } else { exit $LASTEXITCODE }",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build APK from clean ASCII project",
+			"type": "shell",
+			"command": "Set-Location 'C:\\hassan_build'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; npx expo prebuild --clean --platform android; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '.\\android\\gradlew.bat' app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeArchitectures=arm64-v8a",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Assemble APK from Android directory",
+			"type": "shell",
+			"command": "Set-Location 'C:\\hassan_build\\android'; $env:JAVA_HOME='C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot'; $env:ANDROID_HOME='C:\\Users\\www\\AppData\\Local\\Android\\Sdk'; $env:ANDROID_SDK_ROOT=$env:ANDROID_HOME; & '.\\gradlew.bat' app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeArchitectures=arm64-v8a",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Install built APK over USB",
+			"type": "shell",
+			"command": "$adb='C:\\Users\\www\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe'; $apk='C:\\hassan_build\\android\\app\\build\\outputs\\apk\\debug\\app-debug.apk'; if (!(Test-Path $apk)) { Write-Error \"APK not found: $apk\"; exit 1 }; & $adb devices -l; & $adb install -r $apk",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Launch installed Android app",
+			"type": "shell",
+			"command": "& 'C:\\Users\\www\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe' shell monkey -p com.hasanplatform.app 1",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

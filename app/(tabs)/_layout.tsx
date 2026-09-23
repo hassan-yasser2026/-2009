@@ -6,8 +6,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nManager, View, ActivityIndicator } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-import { useAuthStore } from "../src/store/authStore";
-import { COLORS } from "../src/core/constants";
+import { useAuthStore } from "../../src/store/authStore";
+import { COLORS } from "../../src/core/constants";
 
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
@@ -22,9 +22,9 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    "Cairo-Regular": require("../assets/fonts/Cairo-Regular.ttf"),
-    "Cairo-Bold": require("../assets/fonts/Cairo-Bold.ttf"),
-    "Cairo-ExtraBold": require("../assets/fonts/Cairo-ExtraBold.ttf"),
+    "Cairo-Regular": require("../../assets/fonts/Cairo-Regular.ttf"),
+    "Cairo-Bold": require("../../assets/fonts/Cairo-Bold.ttf"),
+    "Cairo-ExtraBold": require("../../assets/fonts/Cairo-ExtraBold.ttf"),
   });
 
   const { initialize, initialized, user } = useAuthStore();
