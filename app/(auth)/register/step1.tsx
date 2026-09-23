@@ -91,7 +91,7 @@ export default function Step1Screen() {
       sectionName,
     });
 
-    router.push("/auth/register/step2");
+    router.push("/register/step2");
   };
 
   return (

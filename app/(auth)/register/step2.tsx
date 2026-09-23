@@ -54,7 +54,7 @@ export default function Step2Screen() {
   const handleNext = () => {
     if (!validate()) return;
     setStep2({ email: email.trim().toLowerCase(), password });
-    router.push("/auth/register/step3");
+    router.push("/register/step3");
   };
 
   return (

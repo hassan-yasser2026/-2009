@@ -52,7 +52,7 @@ export default function Step3Screen() {
       setUser(response.user as any);
 
       reset();
-      router.replace("/auth/register/pending" as any);
+      router.replace("/register/pending" as any);
     } catch (error: any) {
       Alert.alert("خطأ", getErrorMessage(error));
     } finally {

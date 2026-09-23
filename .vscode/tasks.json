@@ -226,6 +226,30 @@
 			"command": "& 'C:\\Users\\www\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe' shell monkey -p com.hasanplatform.app 1",
 			"isBackground": false,
 			"problemMatcher": []
+		},
+		{
+			"label": "Start Hasan backend",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run backend dev server",
+			"type": "shell",
+			"command": "npm run dev",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Build Hasan Platform",
+			"type": "shell",
+			"command": "npm run build",
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

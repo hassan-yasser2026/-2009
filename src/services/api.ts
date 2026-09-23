@@ -1,8 +1,14 @@
 import axios from "axios";
+import { Platform } from "react-native";
 import { storage } from "../core/storage";
 
-// رابط الخدمة المحدث على Railway
-export const API_URL = "https://2009-production.up.railway.app/api";
+const DEFAULT_API_URL =
+  Platform.OS === "android"
+    ? "http://10.0.2.2:3000/api"
+    : "http://localhost:3000/api";
+
+export const API_URL =
+  process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL;
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -10,16 +16,15 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// إضافة التوكن لكل request
 api.interceptors.request.use(async (config) => {
   const token = await storage.getToken();
   if (token) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// التعامل مع الأخطاء
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -30,7 +35,6 @@ api.interceptors.response.use(
   }
 );
 
-// دالة لتحويل أخطاء السيرفر لرسائل عربية
 export function getErrorMessage(error: any): string {
   if (!error.response) {
     return "تحقق من اتصالك بالإنترنت";
