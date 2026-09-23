@@ -1,14 +1,7 @@
 import axios from "axios";
-import { Platform } from "react-native";
 import { storage } from "../core/storage";
 
-const DEFAULT_API_URL =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:3000/api"
-    : "http://localhost:3000/api";
-
-export const API_URL =
-  process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL;
+export const API_URL = "https://1612-production.up.railway.app/api";
 
 export const api = axios.create({
   baseURL: API_URL,
