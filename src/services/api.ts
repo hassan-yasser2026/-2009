@@ -36,6 +36,14 @@ export function getErrorMessage(error: any): string {
   const { status, data } = error.response;
 
   if (data?.message) return data.message;
+  if (Array.isArray(data?.details)) {
+    return data.details
+      .map((detail: { path?: string[]; message?: string }) =>
+        detail.message ? `${detail.path?.join(".") || "البيانات"}: ${detail.message}` : null
+      )
+      .filter(Boolean)
+      .join("\n") || "البيانات غير صحيحة";
+  }
 
   switch (status) {
     case 400:

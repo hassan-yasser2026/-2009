@@ -31,6 +31,18 @@ export default function Step3Screen() {
   const setToken = useAuthStore((s) => s.setToken);
 
   const handleSubmit = async () => {
+    if (
+      !data.fullName ||
+      !data.email ||
+      !data.phone ||
+      !data.password ||
+      !data.gradeId ||
+      !data.gradeName
+    ) {
+      Alert.alert("بيانات ناقصة", "ارجع للخطوات السابقة وتأكد من إدخال كل البيانات المطلوبة");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await authService.register({
@@ -41,7 +53,7 @@ export default function Step3Screen() {
         gradeId: data.gradeId!,
         gradeName: data.gradeName,
         sectionId: data.sectionId,
-        sectionName: data.sectionName,
+        sectionName: data.sectionName || null,
         referralCode: referralCode || undefined,
       });
 

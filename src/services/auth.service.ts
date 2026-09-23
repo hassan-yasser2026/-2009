@@ -8,7 +8,7 @@ export interface RegisterPayload {
   gradeId: number;
   gradeName: string;
   sectionId: string | null;
-  sectionName: string;
+  sectionName: string | null;
   referralCode?: string;
 }
 
