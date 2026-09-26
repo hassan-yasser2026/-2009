@@ -83,7 +83,7 @@ export default function SplashScreen() {
           >
             <View style={styles.photoBorder}>
               <Image
-                source={require("../../android/app/src/main/res/drawable-nodpi/logo.jpg")}
+                source={require("../../assets/logo.jpg")}
                 style={styles.photo}
                 resizeMode="cover"
               />

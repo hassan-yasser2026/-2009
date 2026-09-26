@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { storage } from "../core/storage";
 import { authService } from "../services/auth.service";
+import { api } from "../services/api";
 
 interface User {
   id: string;
@@ -41,9 +42,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     try {
       const token = await storage.getToken();
-      const user = await storage.getUser();
-      if (token && user) {
+      if (!token) {
+        set({ token: null, user: null });
+        return;
+      }
+
+      set({ token });
+      try {
+        const { data: user } = await api.get<User>("/users/me");
+        await storage.setUser(user);
         set({ token, user });
+      } catch (error: any) {
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+          await storage.clear();
+          set({ token: null, user: null });
+          return;
+        }
+
+        const cachedUser = await storage.getUser();
+        if (cachedUser?.status === "active") {
+          set({ token, user: cachedUser });
+        } else {
+          await storage.clear();
+          set({ token: null, user: null });
+        }
       }
     } finally {
       set({ initialized: true });

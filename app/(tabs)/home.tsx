@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,14 @@ import { useAuthStore } from "../../src/store/authStore";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (user?.status !== "active") {
+      router.replace(
+        user?.status === "pending" ? "/register/pending" : "/register/step1"
+      );
+    }
+  }, [user]);
 
   const {
     data: subjects = [],
@@ -87,6 +95,36 @@ export default function HomeScreen() {
             <Text style={styles.daysLabel}>يوم متبقي</Text>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.examsBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push("/exams" as any)}
+        >
+          <View style={styles.examsIcon}>
+            <Ionicons name="document-text-outline" size={25} color="#FFF" />
+          </View>
+          <View style={styles.examsBannerText}>
+            <Text style={styles.examsTitle}>الامتحانات الإلكترونية</Text>
+            <Text style={styles.examsSubtitle}>شاهد الامتحانات المتاحة لصفك</Text>
+          </View>
+          <Ionicons name="chevron-back" size={20} color="#FFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.scheduleBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push("/schedule" as any)}
+        >
+          <View style={styles.examsIcon}>
+            <Ionicons name="calendar-outline" size={25} color="#FFF" />
+          </View>
+          <View style={styles.examsBannerText}>
+            <Text style={styles.examsTitle}>الجدول الأسبوعي</Text>
+            <Text style={styles.examsSubtitle}>تابع مواعيد المواد خلال الأسبوع</Text>
+          </View>
+          <Ionicons name="chevron-back" size={20} color="#FFF" />
+        </TouchableOpacity>
 
         {/* المواد */}
         <View style={styles.sectionHeader}>
@@ -244,6 +282,36 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "rgba(255,255,255,0.75)",
   },
+  examsBanner: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 28,
+  },
+  scheduleBanner: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#0F766E",
+    borderRadius: 16,
+    padding: 14,
+    marginTop: -16,
+    marginBottom: 28,
+  },
+  examsIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  examsBannerText: { flex: 1, alignItems: "flex-end" },
+  examsTitle: { fontFamily: FONTS.bold, color: "#FFF", fontSize: 15 },
+  examsSubtitle: { fontFamily: FONTS.regular, color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 2 },
   sectionHeader: {
     flexDirection: "row-reverse",
     justifyContent: "space-between",

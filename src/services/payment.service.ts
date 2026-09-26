@@ -26,7 +26,7 @@ export const paymentService = {
 
     // نضيف الصورة
     if (webFile) {
-      formData.append("screenshot", webFile, filename);
+      formData.append("screenshot", webFile);
     } else {
       formData.append("screenshot", {
         uri: screenshotUri,
