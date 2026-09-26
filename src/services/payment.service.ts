@@ -10,25 +10,32 @@ export interface UploadResponse {
 }
 
 export const paymentService = {
-  async upload(screenshotUri: string, transactionRef?: string): Promise<UploadResponse> {
+  async upload(
+    screenshotUri: string,
+    transactionRef: string,
+    webFile?: File
+  ): Promise<UploadResponse> {
     const formData = new FormData();
 
     // نجيب اسم الملف والامتداد
-    const filename = screenshotUri.split("/").pop() || "screenshot.jpg";
+    const filename =
+      webFile?.name || screenshotUri.split("/").pop() || "screenshot.jpg";
     const match = /\.(\w+)$/.exec(filename);
     const ext = match ? match[1].toLowerCase() : "jpg";
-    const type = ext === "png" ? "image/png" : "image/jpeg";
+    const type = webFile?.type || (ext === "png" ? "image/png" : "image/jpeg");
 
     // نضيف الصورة
-    formData.append("screenshot", {
-      uri: screenshotUri,
-      name: filename,
-      type,
-    } as any);
-
-    if (transactionRef) {
-      formData.append("transactionRef", transactionRef);
+    if (webFile) {
+      formData.append("screenshot", webFile, filename);
+    } else {
+      formData.append("screenshot", {
+        uri: screenshotUri,
+        name: filename,
+        type,
+      } as any);
     }
+
+    formData.append("transactionRef", transactionRef);
 
     const { data } = await api.post<UploadResponse>("/payments/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },

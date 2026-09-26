@@ -23,8 +23,13 @@ import { paymentService } from "../src/services/payment.service";
 import { getErrorMessage } from "../src/services/api";
 
 export default function PaymentScreen() {
-  const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [screenshot, setScreenshot] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [screenshotError, setScreenshotError] = useState<string | null>(null);
   const [transactionRef, setTransactionRef] = useState("");
+  const [transactionRefError, setTransactionRefError] = useState<string | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -35,24 +40,49 @@ export default function PaymentScreen() {
   };
 
   const pickImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("صلاحيات", "محتاجين صلاحية الوصول للصور عشان ترفع السكرين شوت");
-      return;
-    }
+    setScreenshotError(null);
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
-      allowsEditing: false,
-      quality: 0.8,
-    });
+    try {
+      if (Platform.OS !== "web") {
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          setScreenshotError(
+            "محتاجين صلاحية الوصول للصور عشان ترفع السكرين شوت"
+          );
+          return;
+        }
+      }
 
-    if (!result.canceled && result.assets[0]) {
-      setScreenshot(result.assets[0].uri);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        if (asset.file && asset.file.size > 5 * 1024 * 1024) {
+          setScreenshotError("حجم الصورة لازم يكون 5 ميجابايت أو أقل");
+          return;
+        }
+        setScreenshot(asset);
+      }
+    } catch (error: unknown) {
+      console.error("Failed to select payment screenshot", error);
+      setScreenshotError("تعذر فتح الصور. من فضلك حاول مرة أخرى");
     }
   };
 
   const handleSubmit = async () => {
+    const trimmedTransactionRef = transactionRef.trim();
+    if (!trimmedTransactionRef) {
+      setTransactionRefError("رقم العملية مطلوب");
+      return;
+    }
+
+    setTransactionRefError(null);
+
     if (!screenshot) {
       Alert.alert("تنبيه", "من فضلك ارفع سكرين شوت التحويل");
       return;
@@ -60,7 +90,11 @@ export default function PaymentScreen() {
 
     setLoading(true);
     try {
-      await paymentService.upload(screenshot, transactionRef.trim() || undefined);
+      await paymentService.upload(
+        screenshot.uri,
+        trimmedTransactionRef,
+        Platform.OS === "web" ? screenshot.file : undefined
+      );
       router.replace("/payment-status" as any);
     } catch (error: any) {
       Alert.alert("خطأ", getErrorMessage(error));
@@ -156,10 +190,16 @@ export default function PaymentScreen() {
 
             {screenshot ? (
               <View style={styles.screenshotWrapper}>
-                <Image source={{ uri: screenshot }} style={styles.screenshot} />
+                <Image
+                  source={{ uri: screenshot.uri }}
+                  style={styles.screenshot}
+                />
                 <TouchableOpacity
                   style={styles.removeBtn}
-                  onPress={() => setScreenshot(null)}
+                  onPress={() => {
+                    setScreenshot(null);
+                    setScreenshotError(null);
+                  }}
                 >
                   <Ionicons name="close-circle" size={32} color={COLORS.error} />
                 </TouchableOpacity>
@@ -179,14 +219,21 @@ export default function PaymentScreen() {
                 <Text style={styles.uploadHint}>PNG أو JPG</Text>
               </TouchableOpacity>
             )}
+            {screenshotError ? (
+              <Text style={styles.uploadError}>{screenshotError}</Text>
+            ) : null}
 
             <View style={styles.refWrapper}>
               <Input
-                label="رقم العملية (اختياري)"
+                label="رقم العملية (مطلوب)"
                 placeholder="مثال: 1234567890"
                 value={transactionRef}
-                onChangeText={setTransactionRef}
+                onChangeText={(value) => {
+                  setTransactionRef(value);
+                  if (value.trim()) setTransactionRefError(null);
+                }}
                 keyboardType="number-pad"
+                error={transactionRefError ?? undefined}
               />
             </View>
           </View>
@@ -363,6 +410,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textLight,
     marginTop: 4,
+  },
+  uploadError: {
+    fontFamily: FONTS.regular,
+    fontSize: 13,
+    color: COLORS.error,
+    marginTop: 10,
+    textAlign: "right",
   },
   screenshotWrapper: {
     position: "relative",
