@@ -171,7 +171,7 @@ export default function Step1Screen() {
 
           <View style={styles.loginRow}>
             <Text style={styles.loginText}>عندك حساب بالفعل؟ </Text>
-            <TouchableOpacity onPress={() => router.push("/auth/login")}>
+            <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
               <Text style={styles.loginLink}>سجل دخول</Text>
             </TouchableOpacity>
           </View>

@@ -42,7 +42,7 @@ export default function PaymentScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: false,
       quality: 0.8,
     });
@@ -82,7 +82,16 @@ export default function PaymentScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <TouchableOpacity
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace("/(tabs)/home" as any);
+                }
+              }}
+              style={styles.backBtn}
+            >
               <Ionicons name="arrow-forward" size={24} color={COLORS.textDark} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>دفع الاشتراك</Text>

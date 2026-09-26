@@ -26,6 +26,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loginError, setLoginError] = useState("");
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -47,17 +48,35 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validate()) return;
 
+    setLoginError("");
     try {
       await login(email.trim().toLowerCase(), password);
       router.replace("/(tabs)/home" as any);
     } catch (error: any) {
+      const status = error?.response?.status;
+      const errorCode = error?.response?.data?.error;
+
+      if (status === 401) {
+        const message =
+          errorCode === "email_not_found"
+            ? "الإيميل غير مسجل، راجع الإيميل وحاول مرة تانية."
+            : errorCode === "invalid_password"
+              ? "الباسورد غلط، راجعه وحاول مرة تانية."
+              : "الإيميل أو الباسورد غلط، راجع البيانات وحاول مرة تانية.";
+        setLoginError(message);
+        Alert.alert("بيانات الدخول غير صحيحة", message);
+        return;
+      }
+
       // لو الحساب لسه pending، وديه لشاشة انتظار الموافقة
-      if (error?.response?.status === 403) {
-        const errorCode = error?.response?.data?.error;
+      if (status === 403) {
         if (errorCode === "subscription_inactive") {
+          const message =
+            "حسابك في انتظار موافقة الأدمن. ارفع إيصال الدفع وانتظر التفعيل.";
+          setLoginError(message);
           Alert.alert(
             "حسابك تحت المراجعة",
-            "لسه في انتظار موافقة الأدمن. لو دفعت خلاص، استنى شوية وهيتم تفعيل حسابك.",
+            message,
             [
               { text: "حسنًا", style: "cancel" },
               {
@@ -69,9 +88,11 @@ export default function LoginScreen() {
           return;
         }
         if (errorCode === "subscription_expired") {
+          const message = "انتهى اشتراكك، لازم تجدده عشان تدخل المنصة.";
+          setLoginError(message);
           Alert.alert(
             "انتهى اشتراكك",
-            "لازم تجدد الاشتراك عشان تدخل المنصة",
+            message,
             [
               { text: "لاحقًا", style: "cancel" },
               {
@@ -84,7 +105,9 @@ export default function LoginScreen() {
         }
       }
 
-      Alert.alert("خطأ", getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setLoginError(message);
+      Alert.alert("خطأ", message);
     }
   };
 
@@ -126,6 +149,7 @@ export default function LoginScreen() {
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
+                setLoginError("");
                 if (errors.email) {
                   setErrors((prev) => {
                     const copy = { ...prev };
@@ -148,6 +172,7 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
+                  setLoginError("");
                   if (errors.password) {
                     setErrors((prev) => {
                       const copy = { ...prev };
@@ -189,11 +214,22 @@ export default function LoginScreen() {
             loading={loading}
           />
 
+          {loginError ? (
+            <View style={styles.loginErrorBox}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={20}
+                color={COLORS.error}
+              />
+              <Text style={styles.loginErrorText}>{loginError}</Text>
+            </View>
+          ) : null}
+
           {/* Register Link */}
           <View style={styles.registerRow}>
             <Text style={styles.registerText}>معندكش حساب؟ </Text>
             <TouchableOpacity
-              onPress={() => router.push("/auth/register/step1" as any)}
+              onPress={() => router.push("/(auth)/register/step1" as any)}
               disabled={loading}
             >
               <Text style={styles.registerLink}>سجل دلوقتي</Text>
@@ -259,6 +295,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   form: { marginBottom: 16 },
+  loginErrorBox: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  loginErrorText: {
+    flex: 1,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+    color: COLORS.error,
+    textAlign: "right",
+    lineHeight: 21,
+  },
   passwordWrapper: { position: "relative" },
   eyeBtn: {
     position: "absolute",

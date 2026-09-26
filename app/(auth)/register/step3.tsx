@@ -53,10 +53,9 @@ export default function Step3Screen() {
         gradeId: data.gradeId!,
         gradeName: data.gradeName,
         sectionId: data.sectionId,
-        sectionName: data.sectionName || null,
+        sectionName: data.sectionName,
         referralCode: referralCode || undefined,
       });
-
       // حفظ التوكن وبيانات المستخدم
       await storage.setToken(response.token);
       await storage.setUser(response.user);
@@ -65,7 +64,7 @@ export default function Step3Screen() {
 
       reset();
       router.replace("/register/pending" as any);
-    } catch (error: any) {
+    } catch (error: unknown) {
       Alert.alert("خطأ", getErrorMessage(error));
     } finally {
       setLoading(false);

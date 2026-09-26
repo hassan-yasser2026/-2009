@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
+import { createElement, type CSSProperties } from "react";
 import { COLORS, FONTS } from "../../src/core/constants";
 
 // استخراج YouTube ID من الرابط
@@ -109,17 +111,35 @@ export default function LectureScreen() {
             <ActivityIndicator size="large" color={COLORS.secondary} />
           </View>
         ) : null}
-        <WebView
-          source={{ html }}
-          style={styles.webview}
-          onLoadEnd={onLoadEnd}
-          allowsFullscreenVideo
-          mediaPlaybackRequiresUserAction={false}
-          javaScriptEnabled
-          domStorageEnabled
-          originWhitelist={["*"]}
-          userAgent="Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36"
-        />
+        {Platform.OS === "web" ? (
+          createElement("iframe", {
+            src: embedUrl,
+            title: title ? decodeURIComponent(title) : "المحاضرة",
+            allow:
+              "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+            allowFullScreen: true,
+            onLoad: onLoadEnd,
+            style: {
+              width: "100%",
+              height: "100%",
+              border: 0,
+              position: "absolute",
+              inset: 0,
+            } satisfies CSSProperties,
+          })
+        ) : (
+          <WebView
+            source={{ html }}
+            style={styles.webview}
+            onLoadEnd={onLoadEnd}
+            allowsFullscreenVideo
+            mediaPlaybackRequiresUserAction={false}
+            javaScriptEnabled
+            domStorageEnabled
+            originWhitelist={["*"]}
+            userAgent="Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36"
+          />
+        )}
       </View>
 
       {/* Info */}

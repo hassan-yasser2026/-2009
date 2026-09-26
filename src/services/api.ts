@@ -1,7 +1,14 @@
 import axios from "axios";
 import { storage } from "../core/storage";
 
-export const API_URL = "https://1612-production.up.railway.app/api";
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
+if (!configuredApiUrl) {
+  throw new Error(
+    "EXPO_PUBLIC_API_URL is not configured. Add it to the Expo environment before starting the app."
+  );
+}
+
+export const API_URL = configuredApiUrl.replace(/\/+$/, "");
 
 export const api = axios.create({
   baseURL: API_URL,
