@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -5,16 +6,24 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { COLORS, FONTS } from "../../src/core/constants";
 import { examService } from "../../src/services/exam.service";
+import { useAuthStore } from "../../src/store/authStore";
 
 export default function ExamResultScreen() {
   const { examId } = useLocalSearchParams<{ examId: string }>();
+  const user = useAuthStore((state) => state.user);
   const resultQuery = useQuery({
     queryKey: ["exam-result", examId],
     queryFn: () => examService.result(examId),
-    enabled: Boolean(examId),
+    enabled: Boolean(examId) && user?.status === "active",
     retry: false,
   });
   const result = resultQuery.data;
+
+  useEffect(() => {
+    if (user?.status !== "active") {
+      router.replace(user?.status === "pending" ? "/register/pending" : "/register/step1");
+    }
+  }, [user]);
 
   if (resultQuery.isLoading) {
     return <View style={styles.center}><ActivityIndicator size="large" color={COLORS.primary} /></View>;

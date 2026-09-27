@@ -2,17 +2,19 @@
   "expo": {
     "name": "ذاكر صح",
     "slug": "hasan_platform",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "scheme": "hasanplatform",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hasanplatform.app",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "buildNumber": "3"
     },
     "android": {
       "package": "com.hasanplatform.app",
+      "versionCode": 3,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#1E3A8A"
@@ -25,9 +27,6 @@
       "expo-notifications",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    ]
   }
 }

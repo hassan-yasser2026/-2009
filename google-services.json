@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "875774149245",
+    "project_id": "study-well-ccb76",
+    "storage_bucket": "study-well-ccb76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875774149245:android:9ebfb1fb4dd058b4c62714",
+        "android_client_info": {
+          "package_name": "com.hasanplatform.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCagzGQv2t7pTtanKAlKMmZrSz2JwrG8hY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

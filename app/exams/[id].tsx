@@ -35,16 +35,7 @@ export default function ExamDetailsScreen() {
 
   const startExam = async () => {
     if (!exam) return;
-    try {
-      const started = await examService.start(exam.id);
-      router.push({ pathname: "/exams/take", params: { examId: exam.id, remainingSeconds: String(started.remainingSeconds) } });
-    } catch (error: any) {
-      if (error?.response?.status === 410) {
-        router.replace({ pathname: "/exams/result", params: { examId: exam.id } });
-      } else {
-        Alert.alert("تعذر بدء الامتحان", getErrorMessage(error));
-      }
-    }
+    router.push({ pathname: "/exams/take", params: { examId: exam.id } });
   };
 
   const submitPayment = async () => {

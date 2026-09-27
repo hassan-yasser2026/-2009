@@ -7,13 +7,15 @@ import { useQuery } from "@tanstack/react-query";
 import { COLORS, FONTS } from "../../src/core/constants";
 import { examService } from "../../src/services/exam.service";
 import { getErrorMessage } from "../../src/services/api";
+import { useAuthStore } from "../../src/store/authStore";
 
 export default function TakeExamScreen() {
   const { examId } = useLocalSearchParams<{ examId: string }>();
+  const user = useAuthStore((state) => state.user);
   const examQuery = useQuery({
     queryKey: ["exam-start", examId],
     queryFn: () => examService.start(examId),
-    enabled: Boolean(examId),
+    enabled: Boolean(examId) && user?.status === "active",
     retry: false,
   });
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,6 +24,12 @@ export default function TakeExamScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const submittedRef = useRef(false);
+
+  useEffect(() => {
+    if (user?.status !== "active") {
+      router.replace(user?.status === "pending" ? "/register/pending" : "/register/step1");
+    }
+  }, [user]);
 
   useEffect(() => {
     if (examQuery.data) setRemaining(examQuery.data.remainingSeconds);
