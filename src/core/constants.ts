@@ -1,6 +1,6 @@
 export const APP = {
-  name: "منصة البشمهندس حسن التعليمية",
-  shortName: "منصة البشمهندس حسن",
+  name: "ذاكر صح",
+  shortName: "ذاكر صح",
   slogan: "التعليم خطوة بخطوة نحو التفوق",
   vodafoneCash: "01067254988",
   monthlyPrice: 15,
