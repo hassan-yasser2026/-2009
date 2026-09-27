@@ -27,6 +27,12 @@
       "expo-notifications",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f5b54208-40d7-4738-b5a3-1ab2f05c1098"
+      }
+    }
   }
 }
