@@ -250,6 +250,25 @@
 			"command": "npm run build",
 			"isBackground": false,
 			"problemMatcher": []
+		},
+		{
+			"label": "Start Expo development server",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"expo",
+				"start"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Hasan Platform",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }
