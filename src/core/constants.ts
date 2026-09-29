@@ -3,6 +3,8 @@ export const APP = {
   shortName: "ذاكر صح",
   slogan: "التعليم خطوة بخطوة نحو التفوق",
   vodafoneCash: "01067254988",
+  supportPhone: "01099536320",
+  whatsapp: "201099536320",
   monthlyPrice: 15,
   referralTarget: 7,
   trialDays: 30,

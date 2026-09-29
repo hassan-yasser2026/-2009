@@ -35,14 +35,6 @@ export default function PaymentStatusScreen() {
     refetchInterval: 30000, // كل 30 ثانية
   });
 
-  // لو الحساب اتفعل، وديه على الرئيسية
-  useEffect(() => {
-    if (data?.user?.status === "active" && user) {
-      setUser({ ...user, status: "active" });
-      router.replace("/(tabs)/home" as any);
-    }
-  }, [data?.user?.status]);
-
   useEffect(() => {
     Animated.loop(
       Animated.timing(rotateAnim, {
@@ -77,6 +69,34 @@ export default function PaymentStatusScreen() {
   const latestPayment = data?.payments?.[0];
   const isPending = latestPayment?.status === "pending";
   const isRejected = latestPayment?.status === "rejected";
+  const isApproved = latestPayment?.status === "approved";
+
+  useEffect(() => {
+    if (!user) return;
+    const accountIsActive = data?.user?.status === "active";
+    if (!isApproved && !accountIsActive) return;
+    setUser({
+      ...user,
+      status: "active",
+      subscriptionEnd: data?.user?.subscriptionEnd ?? user.subscriptionEnd,
+    });
+    if (!isApproved) {
+      router.replace("/(tabs)/home" as any);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      router.replace("/(tabs)/home" as any);
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [
+    data?.payments?.[0]?.status,
+    data?.user?.status,
+    data?.user?.subscriptionEnd,
+    isApproved,
+    setUser,
+    user?.id,
+    user?.status,
+  ]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -111,6 +131,8 @@ export default function PaymentStatusScreen() {
                     color={COLORS.secondary}
                   />
                 </Animated.View>
+              ) : isApproved ? (
+                <Ionicons name="checkmark-circle" size={80} color={COLORS.success} />
               ) : (
                 <Ionicons name="hourglass-outline" size={80} color={COLORS.secondary} />
               )}
@@ -119,17 +141,21 @@ export default function PaymentStatusScreen() {
             {/* العنوان */}
             <Text style={styles.title}>
               {isRejected
-                ? "تم رفض الطلب ❌"
+                ? "اترفضت، ارفع سكرين جديد"
                 : isPending
-                ? "طلبك تحت المراجعة ⏳"
+                ? "قيد المراجعة ⏳"
+                : isApproved
+                ? "تم القبول ✅"
                 : "في انتظار رفع الدفع"}
             </Text>
 
             <Text style={styles.subtitle}>
               {isRejected
-                ? "للأسف، السكرين شوت اللي رفعته مرفوض. تأكد من صحة التحويل وارفع صورة واضحة."
+                ? "السكرين شوت اترفضت. راجع ملاحظة الأدمن وارفع سكرين شوت جديد."
                 : isPending
                 ? "استلمنا سكرين شوت التحويل، وهيتم مراجعته من الأدمن خلال 24 ساعة"
+                : isApproved
+                ? "تم قبول الدفع، جارٍ تحويلك إلى الصفحة الرئيسية."
                 : "ارفع سكرين شوت التحويل عشان نقدر نراجع حسابك"}
             </Text>
 
@@ -143,12 +169,18 @@ export default function PaymentStatusScreen() {
                       {
                         backgroundColor: isRejected
                           ? COLORS.error
+                          : isApproved
+                          ? COLORS.success
                           : COLORS.secondary,
                       },
                     ]}
                   />
                   <Text style={styles.statusText}>
-                    {isRejected ? "مرفوض" : "في انتظار موافقة الأدمن"}
+                    {isRejected
+                      ? "مرفوض"
+                      : isApproved
+                      ? "تم القبول"
+                      : "قيد المراجعة"}
                   </Text>
                 </View>
 
@@ -173,7 +205,7 @@ export default function PaymentStatusScreen() {
             <View style={styles.supportBox}>
               <Ionicons name="headset-outline" size={20} color={COLORS.primary} />
               <Text style={styles.supportText}>
-                لو حصلت مشكلة، تواصل مع الدعم على {APP.vodafoneCash}
+                للدعم: {APP.supportPhone}
               </Text>
             </View>
 
@@ -184,9 +216,9 @@ export default function PaymentStatusScreen() {
                 onPress={() => router.replace("/payment" as any)}
               >
                 <Ionicons name="refresh" size={20} color="#FFF" />
-                <Text style={styles.primaryBtnText}>ارفع سكرين شوت جديد</Text>
+                <Text style={styles.primaryBtnText}>رفع سكرين جديد</Text>
               </TouchableOpacity>
-            ) : (
+            ) : !isApproved ? (
               <TouchableOpacity
                 style={styles.refreshBtn}
                 onPress={() => refetch()}
@@ -197,7 +229,7 @@ export default function PaymentStatusScreen() {
                   {isRefetching ? "جارٍ التحديث..." : "تحديث الحالة"}
                 </Text>
               </TouchableOpacity>
-            )}
+            ) : null}
           </>
         )}
       </ScrollView>

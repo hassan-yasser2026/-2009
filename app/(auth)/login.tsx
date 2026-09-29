@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, FONTS } from "../../src/core/constants";
+import { APP, COLORS, FONTS } from "../../src/core/constants";
 import { Button } from "../../src/components/Button";
 import { Input } from "../../src/components/Input";
 import { useAuthStore } from "../../src/store/authStore";
@@ -114,7 +114,7 @@ export default function LoginScreen() {
   const handleForgotPassword = () => {
     Alert.alert(
       "استعادة كلمة المرور",
-      "تواصل مع الأدمن على رقم فودافون كاش 01067254988 لإعادة تعيين كلمة المرور.",
+      `تواصل مع الدعم على ${APP.supportPhone} لإعادة تعيين كلمة المرور.`,
       [{ text: "حسنًا" }]
     );
   };
@@ -245,7 +245,7 @@ export default function LoginScreen() {
             />
             <Text style={styles.helpText}>
               لو واجهتك أي مشكلة، تواصل مع الدعم على{" "}
-              <Text style={styles.helpPhone}>01067254988</Text>
+              <Text style={styles.helpPhone}>{APP.supportPhone}</Text>
             </Text>
           </View>
         </ScrollView>

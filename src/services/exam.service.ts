@@ -54,6 +54,8 @@ export interface ExamResult {
   percentage: number;
 }
 
+export interface ExamSubmissionResult extends ExamResult {}
+
 export const examService = {
   async list(): Promise<ExamSummary[]> {
     const { data } = await api.get<ExamSummary[]>("/exams");
@@ -77,6 +79,11 @@ export const examService = {
 
   async result(examId: string): Promise<ExamResult> {
     const { data } = await api.get<ExamResult>(`/exams/${examId}/result`);
+    return data;
+  },
+
+  async results(): Promise<ExamSubmissionResult[]> {
+    const { data } = await api.get<ExamSubmissionResult[]>("/exams/results");
     return data;
   },
 

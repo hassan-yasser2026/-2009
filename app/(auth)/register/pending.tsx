@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, FONTS } from "../../../src/core/constants";
+import { APP, COLORS, FONTS } from "../../../src/core/constants";
 import { Button } from "../../../src/components/Button";
 
 export default function PendingScreen() {
@@ -25,7 +25,10 @@ export default function PendingScreen() {
               حوّل 15ج على فودافون كاش على الرقم:
             </Text>
           </View>
-          <Text style={styles.phone}>01067254988</Text>
+          <Text style={styles.phone}>{APP.vodafoneCash}</Text>
+          <Text style={styles.supportText}>
+            للتواصل والدعم: {APP.supportPhone}
+          </Text>
           <View style={styles.bulletRow}>
             <Text style={styles.bulletText}>
               ارفع سكرين شوت التحويل من داخل التطبيق
@@ -102,5 +105,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     letterSpacing: 2,
     marginVertical: 12,
+  },
+  supportText: {
+    fontFamily: FONTS.bold,
+    fontSize: 13,
+    color: COLORS.primary,
+    textAlign: "right",
+    marginBottom: 12,
   },
 });

@@ -5,7 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { COLORS, FONTS } from "../../src/core/constants";
+import { APP, COLORS, FONTS } from "../../src/core/constants";
 import { examService } from "../../src/services/exam.service";
 import { useAuthStore } from "../../src/store/authStore";
 import { Input } from "../../src/components/Input";
@@ -107,7 +107,8 @@ export default function ExamDetailsScreen() {
             {exam.paymentStatus === "rejected" && (
               <Text style={styles.rejectedNotice}>تم رفض إيصال الدفع السابق. يمكنك إرسال إيصال جديد.</Text>
             )}
-            <Text style={styles.body}>حوّل {exam.price} جنيه على رقم فودافون كاش 01067254988، ثم ارفع إيصال التحويل.</Text>
+            <Text style={styles.body}>حوّل {exam.price} جنيه على رقم فودافون كاش {APP.vodafoneCash}، ثم ارفع إيصال التحويل.</Text>
+            <Text style={styles.supportPhone}>للتواصل والدعم: {APP.supportPhone}</Text>
             {screenshot ? (
               <View style={styles.imageWrap}>
                 <Image source={{ uri: screenshot.uri }} style={styles.image} />
@@ -157,6 +158,7 @@ const styles = StyleSheet.create({
   subject: { color: COLORS.primary, textAlign: "right", fontFamily: FONTS.bold },
   title: { color: COLORS.textDark, textAlign: "right", fontFamily: FONTS.extraBold, fontSize: 24 },
   body: { color: COLORS.textLight, textAlign: "right", fontFamily: FONTS.regular, lineHeight: 23 },
+  supportPhone: { color: COLORS.primary, textAlign: "right", fontFamily: FONTS.bold, marginBottom: 8 },
   infoRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 12 },
   infoItem: { alignItems: "center", gap: 5 },
   infoLabel: { color: COLORS.textLight, fontFamily: FONTS.regular, fontSize: 12 },

@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { COLORS, FONTS, APP } from "../src/core/constants";
 import { Button } from "../src/components/Button";
 import { Input } from "../src/components/Input";
@@ -23,6 +24,7 @@ import { paymentService } from "../src/services/payment.service";
 import { getErrorMessage } from "../src/services/api";
 
 export default function PaymentScreen() {
+  const queryClient = useQueryClient();
   const [screenshot, setScreenshot] =
     useState<ImagePicker.ImagePickerAsset | null>(null);
   const [screenshotError, setScreenshotError] = useState<string | null>(null);
@@ -95,6 +97,7 @@ export default function PaymentScreen() {
         trimmedTransactionRef,
         Platform.OS === "web" ? screenshot.file : undefined
       );
+      await queryClient.invalidateQueries({ queryKey: ["payment-status"] });
       router.replace("/payment-status" as any);
     } catch (error: any) {
       Alert.alert("خطأ", getErrorMessage(error));
@@ -163,6 +166,9 @@ export default function PaymentScreen() {
                 <Text style={styles.copyText}>{copied ? "تم النسخ" : "نسخ"}</Text>
               </View>
             </TouchableOpacity>
+            <Text style={styles.supportNumber}>
+              للتواصل والدعم: {APP.supportPhone}
+            </Text>
           </View>
 
           {/* خطوات التحويل */}
@@ -341,6 +347,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: COLORS.primary,
     borderStyle: "dashed",
+  },
+  supportNumber: {
+    fontFamily: FONTS.bold,
+    fontSize: 13,
+    color: COLORS.primary,
+    textAlign: "right",
+    marginTop: 12,
   },
   numberText: {
     fontFamily: FONTS.extraBold,

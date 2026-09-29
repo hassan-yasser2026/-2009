@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { COLORS, FONTS } from "../../src/core/constants";
 import { subjectService } from "../../src/services/subject.service";
+import { scheduleService } from "../../src/services/schedule.service";
 import { useAuthStore } from "../../src/store/authStore";
 
 export default function HomeScreen() {
@@ -36,6 +37,11 @@ export default function HomeScreen() {
     queryKey: ["subjects", user?.gradeId, user?.sectionId],
     queryFn: () => subjectService.getSubjects(),
     enabled: !!user,
+  });
+  const { data: todaySchedule = [], isLoading: todayLoading } = useQuery({
+    queryKey: ["schedule", "today"],
+    queryFn: scheduleService.getToday,
+    enabled: user?.status === "active",
   });
 
   const onRefresh = useCallback(() => {
@@ -81,6 +87,25 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.todayCard}>
+          <View style={styles.todayHeader}>
+            <Text style={styles.todayTitle}>📅 جدول النهاردة</Text>
+            <Ionicons name="calendar-outline" size={22} color={COLORS.primary} />
+          </View>
+          {todayLoading ? (
+            <ActivityIndicator color={COLORS.primary} />
+          ) : todaySchedule.length > 0 ? (
+            todaySchedule.map((item) => (
+              <View key={item.id} style={styles.todayItem}>
+                <Text style={styles.todaySubject}>{item.subject.name}</Text>
+                <Text style={styles.todayTime}>{item.time || "موعد الحصة غير محدد"}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.todayEmpty}>مفيش حصص النهاردة</Text>
+          )}
+        </View>
+
         {/* بطاقة الحالة */}
         <View style={styles.statusCard}>
           <View style={styles.statusLeft}>
@@ -107,6 +132,21 @@ export default function HomeScreen() {
           <View style={styles.examsBannerText}>
             <Text style={styles.examsTitle}>الامتحانات الإلكترونية</Text>
             <Text style={styles.examsSubtitle}>شاهد الامتحانات المتاحة لصفك</Text>
+          </View>
+          <Ionicons name="chevron-back" size={20} color="#FFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.resultsBanner}
+          activeOpacity={0.85}
+          onPress={() => router.push("/exams/results" as any)}
+        >
+          <View style={styles.examsIcon}>
+            <Ionicons name="trophy-outline" size={25} color="#FFF" />
+          </View>
+          <View style={styles.examsBannerText}>
+            <Text style={styles.examsTitle}>نتائجي</Text>
+            <Text style={styles.examsSubtitle}>راجع نتائج امتحاناتك السابقة</Text>
           </View>
           <Ionicons name="chevron-back" size={20} color="#FFF" />
         </TouchableOpacity>
@@ -243,6 +283,37 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 28,
   },
+  todayCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 16,
+    marginBottom: 20,
+  },
+  todayHeader: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  todayTitle: { fontFamily: FONTS.bold, color: COLORS.textDark, fontSize: 16 },
+  todayItem: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 9,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  todaySubject: { fontFamily: FONTS.bold, color: COLORS.textDark, fontSize: 14 },
+  todayTime: { fontFamily: FONTS.regular, color: COLORS.textLight, fontSize: 13 },
+  todayEmpty: {
+    fontFamily: FONTS.regular,
+    color: COLORS.textLight,
+    textAlign: "right",
+    paddingTop: 8,
+  },
   statusLeft: { alignItems: "flex-end" },
   statusLabel: {
     fontFamily: FONTS.regular,
@@ -296,6 +367,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     backgroundColor: "#0F766E",
+    borderRadius: 16,
+    padding: 14,
+    marginTop: -16,
+    marginBottom: 28,
+  },
+  resultsBanner: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#7C3AED",
     borderRadius: 16,
     padding: 14,
     marginTop: -16,

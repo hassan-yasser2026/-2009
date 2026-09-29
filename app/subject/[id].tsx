@@ -7,16 +7,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { COLORS, FONTS } from "../../src/core/constants";
 import { subjectService, Lecture } from "../../src/services/subject.service";
+import { getErrorMessage } from "../../src/services/api";
 
 export default function SubjectScreen() {
   const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
+  const queryClient = useQueryClient();
 
   const {
     data: lectures = [],
@@ -28,8 +31,30 @@ export default function SubjectScreen() {
     queryFn: () => subjectService.getLectures(id),
     enabled: !!id,
   });
+  const progressQuery = useQuery({
+    queryKey: ["subject-progress", id],
+    queryFn: () => subjectService.getProgress(id),
+    enabled: !!id,
+  });
 
   const [expanded, setExpanded] = useState<string | null>(null);
+  const openLecture = async (lecture: Lecture) => {
+    try {
+      await subjectService.markViewed(lecture.id);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["lectures", id] }),
+        queryClient.invalidateQueries({ queryKey: ["subject-progress", id] }),
+      ]);
+    } catch (error) {
+      console.error("Failed to save lecture view", error);
+      Alert.alert("تعذر حفظ التقدم", getErrorMessage(error));
+    }
+    router.push(
+      `/lecture/${lecture.id}?url=${encodeURIComponent(
+        lecture.youtubeUrl
+      )}&title=${encodeURIComponent(lecture.title)}` as any
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -63,6 +88,27 @@ export default function SubjectScreen() {
           />
         }
       >
+        <View style={styles.progressCard}>
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressTitle}>تقدمك في المادة</Text>
+            <Text style={styles.progressCount}>
+              {progressQuery.data?.viewedLectures ?? 0}/
+              {progressQuery.data?.totalLectures ?? lectures.length} محاضرة
+            </Text>
+          </View>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${progressQuery.data?.percentage ?? 0}%` },
+              ]}
+            />
+          </View>
+          <Text style={styles.progressPercentage}>
+            {progressQuery.data?.percentage ?? 0}% مكتمل
+          </Text>
+        </View>
+
         {isLoading ? (
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color={COLORS.primary} />
@@ -84,6 +130,7 @@ export default function SubjectScreen() {
                 lecture={lecture}
                 index={index + 1}
                 isExpanded={expanded === lecture.id}
+                onViewLecture={() => openLecture(lecture)}
                 onToggle={() =>
                   setExpanded(expanded === lecture.id ? null : lecture.id)
                 }
@@ -100,11 +147,13 @@ function LectureItem({
   lecture,
   index,
   isExpanded,
+  onViewLecture,
   onToggle,
 }: {
   lecture: Lecture;
   index: number;
   isExpanded: boolean;
+  onViewLecture: () => void;
   onToggle: () => void;
 }) {
   return (
@@ -115,7 +164,11 @@ function LectureItem({
         activeOpacity={0.7}
       >
         <View style={styles.lectureNumber}>
-          <Text style={styles.lectureNumberText}>{index}</Text>
+          {lecture.viewed ? (
+            <Ionicons name="checkmark" size={17} color="#FFF" />
+          ) : (
+            <Text style={styles.lectureNumberText}>{index}</Text>
+          )}
         </View>
         <View style={styles.lectureContent}>
           <Text style={styles.lectureTitle} numberOfLines={2}>
@@ -138,13 +191,7 @@ function LectureItem({
         <View style={styles.lectureExpanded}>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() =>
-              router.push(
-                `/lecture/${lecture.id}?url=${encodeURIComponent(
-                  lecture.youtubeUrl
-                )}&title=${encodeURIComponent(lecture.title)}` as any
-              )
-            }
+            onPress={onViewLecture}
             activeOpacity={0.8}
           >
             <View style={styles.actionIcon}>
@@ -205,6 +252,36 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   scroll: { padding: 20, paddingBottom: 40 },
+  progressCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 16,
+    marginBottom: 18,
+  },
+  progressHeader: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  progressTitle: { fontFamily: FONTS.bold, color: COLORS.textDark, fontSize: 15 },
+  progressCount: { fontFamily: FONTS.regular, color: COLORS.textLight, fontSize: 13 },
+  progressTrack: {
+    height: 9,
+    backgroundColor: COLORS.border,
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  progressFill: { height: "100%", backgroundColor: COLORS.success, borderRadius: 5 },
+  progressPercentage: {
+    fontFamily: FONTS.bold,
+    color: COLORS.success,
+    textAlign: "left",
+    fontSize: 12,
+    marginTop: 8,
+  },
   loadingBox: { paddingVertical: 60, alignItems: "center", gap: 12 },
   loadingText: {
     fontFamily: FONTS.regular,

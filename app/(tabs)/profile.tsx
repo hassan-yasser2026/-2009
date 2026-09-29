@@ -54,7 +54,7 @@ export default function ProfileScreen() {
       case "المساعدة والدعم":
         try {
           await Linking.openURL(
-            `https://wa.me/2${APP.vodafoneCash.replace(/^0/, "")}`
+            `https://wa.me/${APP.whatsapp}`
           );
         } catch (error) {
           console.error("Failed to open support chat", error);

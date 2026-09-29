@@ -18,6 +18,14 @@ export interface Lecture {
   pdfUrl: string | null;
   description: string | null;
   order: number;
+  viewed: boolean;
+}
+
+export interface SubjectProgress {
+  totalLectures: number;
+  viewedLectures: number;
+  percentage: number;
+  viewedLectureIds: string[];
 }
 
 export const subjectService = {
@@ -29,5 +37,14 @@ export const subjectService = {
   async getLectures(subjectId: string): Promise<Lecture[]> {
     const { data } = await api.get<Lecture[]>(`/subjects/${subjectId}/lectures`);
     return data;
+  },
+
+  async getProgress(subjectId: string): Promise<SubjectProgress> {
+    const { data } = await api.get<SubjectProgress>(`/subjects/${subjectId}/progress`);
+    return data;
+  },
+
+  async markViewed(lectureId: string): Promise<void> {
+    await api.post(`/lectures/${lectureId}/view`);
   },
 };
