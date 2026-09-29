@@ -1,12 +1,20 @@
 import { create } from "zustand";
-import { SectionId } from "../core/constants";
+import type {
+  ElectiveId,
+  SectionId,
+  TrackId,
+} from "../core/constants";
 
 interface RegistrationData {
   fullName: string;
   phone: string;
   gradeId: number | null;
   gradeName: string;
-  sectionId: SectionId;
+  trackId: TrackId | null;
+  trackName: string;
+  electiveId: ElectiveId | null;
+  electiveName: string;
+  sectionId: SectionId | null;
   sectionName: string;
   email: string;
   password: string;
@@ -15,7 +23,21 @@ interface RegistrationData {
 
 interface RegistrationStore {
   data: RegistrationData;
-  setStep1: (data: Pick<RegistrationData, "fullName" | "phone" | "gradeId" | "gradeName" | "sectionId" | "sectionName">) => void;
+  setStep1: (
+    data: Pick<
+      RegistrationData,
+      | "fullName"
+      | "phone"
+      | "gradeId"
+      | "gradeName"
+      | "trackId"
+      | "trackName"
+      | "electiveId"
+      | "electiveName"
+      | "sectionId"
+      | "sectionName"
+    >,
+  ) => void;
   setStep2: (data: Pick<RegistrationData, "email" | "password">) => void;
   setReferral: (code: string) => void;
   reset: () => void;
@@ -26,6 +48,10 @@ const initialData: RegistrationData = {
   phone: "",
   gradeId: null,
   gradeName: "",
+  trackId: null,
+  trackName: "",
+  electiveId: null,
+  electiveName: "",
   sectionId: null,
   sectionName: "",
   email: "",

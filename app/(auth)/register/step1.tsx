@@ -12,9 +12,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import {
   COLORS,
+  FOREIGN_LANGUAGES,
   FONTS,
+  getElectiveName,
+  getElectivesForTrack,
   getSectionsForGrade,
+  getTrackName,
+  getTracksForGrade,
+} from "../../../src/core/constants";
+import type {
+  ElectiveId,
+  ForeignLanguageId,
   SectionId,
+  TrackId,
 } from "../../../src/core/constants";
 import { Button } from "../../../src/components/Button";
 import { Input } from "../../../src/components/Input";
@@ -29,26 +39,62 @@ export default function Step1Screen() {
   const [phone, setPhone] = useState(data.phone);
   const [gradeId, setGradeId] = useState<number | null>(data.gradeId);
   const [gradeName, setGradeName] = useState(data.gradeName);
-  const [sectionId, setSectionId] = useState<SectionId>(data.sectionId);
+  const [trackId, setTrackId] = useState<TrackId | null>(data.trackId);
+  const [electiveId, setElectiveId] = useState<ElectiveId | null>(data.electiveId);
+  const savedForeignLanguage = FOREIGN_LANGUAGES.find(
+    (language) => language.id === data.electiveId,
+  );
+  const [electiveOptionId, setElectiveOptionId] = useState<string | null>(
+    savedForeignLanguage ? "language" : data.electiveId,
+  );
+  const [foreignLanguageId, setForeignLanguageId] =
+    useState<ForeignLanguageId | null>(savedForeignLanguage?.id ?? null);
+  const [sectionId, setSectionId] = useState<SectionId | null>(data.sectionId);
   const [sectionName, setSectionName] = useState(data.sectionName);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const availableTracks = getTracksForGrade(gradeId);
+  const availableElectives = getElectivesForTrack(trackId);
   const availableSections = getSectionsForGrade(gradeId);
+  const selectedElective = availableElectives.find(
+    (elective) => elective.id === electiveOptionId,
+  );
   const showSections = availableSections.length > 0;
+  const requiresForeignLanguage = selectedElective?.id === "language";
 
   const handleGradeChange = (id: number, name: string) => {
     setGradeId(id);
     setGradeName(name);
-    // لو الصف مش ثانوي، نصفّر القسم
-    const sectionsForThisGrade = getSectionsForGrade(id);
-    if (sectionsForThisGrade.length === 0) {
-      setSectionId(null);
-      setSectionName("");
-    } else {
-      // لو الصف الجديد فيه أقسام، نصفّر القسم القديم عشان المستخدم يختار من جديد
-      setSectionId(null);
-      setSectionName("");
-    }
+    setTrackId(null);
+    setElectiveId(null);
+    setElectiveOptionId(null);
+    setForeignLanguageId(null);
+    setSectionId(null);
+    setSectionName("");
+    setErrors((previous) => {
+      const next = { ...previous };
+      delete next.section;
+      delete next.track;
+      delete next.elective;
+      delete next.foreignLanguage;
+      return next;
+    });
+  };
+
+  const handleTrackChange = (id: TrackId) => {
+    setTrackId(id);
+    setElectiveId(null);
+    setElectiveOptionId(null);
+    setForeignLanguageId(null);
+    setSectionId(null);
+    setSectionName("");
+    setErrors((previous) => {
+      const next = { ...previous };
+      delete next.track;
+      delete next.elective;
+      delete next.foreignLanguage;
+      return next;
+    });
   };
 
   const validate = () => {
@@ -71,6 +117,18 @@ export default function Step1Screen() {
       newErrors.grade = "من فضلك اختر الصف الدراسي";
     }
 
+    if (gradeId === 5 && !trackId) {
+      newErrors.track = "من فضلك اختر المسار";
+    }
+
+    if (gradeId === 5 && !electiveId) {
+      newErrors.elective = "من فضلك اختر المادة الاختيارية";
+    }
+
+    if (gradeId === 5 && requiresForeignLanguage && !foreignLanguageId) {
+      newErrors.foreignLanguage = "من فضلك اختر اللغة";
+    }
+
     if (showSections && !sectionId) {
       newErrors.section = "من فضلك اختر القسم";
     }
@@ -82,13 +140,19 @@ export default function Step1Screen() {
   const handleNext = () => {
     if (!validate()) return;
 
+    const trackName = getTrackName(trackId);
+    const electiveName = getElectiveName(electiveId);
     setStep1({
       fullName: fullName.trim(),
       phone: phone.trim(),
       gradeId: gradeId!,
       gradeName,
-      sectionId,
-      sectionName,
+      trackId: gradeId === 5 ? trackId : null,
+      trackName: gradeId === 5 ? trackName : "",
+      electiveId: gradeId === 5 ? electiveId : null,
+      electiveName: gradeId === 5 ? electiveName : "",
+      sectionId: gradeId === 6 ? sectionId : null,
+      sectionName: gradeId === 6 ? sectionName : "",
     });
 
     router.push("/register/step2");
@@ -138,6 +202,126 @@ export default function Step1Screen() {
               selectedId={gradeId}
               onSelect={handleGradeChange}
             />
+
+            {gradeId === 5 ? (
+              <View style={styles.sectionWrapper}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionDivider} />
+                  <Text style={styles.label}>المسار</Text>
+                </View>
+                {errors.track ? (
+                  <Text style={styles.errorText}>{errors.track}</Text>
+                ) : null}
+                <View style={styles.choiceList}>
+                  {availableTracks.map((track) => (
+                    <TouchableOpacity
+                      key={track.id}
+                      onPress={() => handleTrackChange(track.id)}
+                      activeOpacity={0.8}
+                      style={[
+                        styles.choiceItem,
+                        trackId === track.id && styles.choiceItemSelected,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.choiceText,
+                          trackId === track.id && styles.choiceTextSelected,
+                        ]}
+                      >
+                        {track.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {trackId ? (
+                  <View style={styles.nestedChoice}>
+                    <Text style={styles.label}>المادة الاختيارية</Text>
+                    {errors.elective ? (
+                      <Text style={styles.errorText}>{errors.elective}</Text>
+                    ) : null}
+                    <View style={styles.choiceList}>
+                      {availableElectives.map((elective) => (
+                        <TouchableOpacity
+                          key={elective.id}
+                          onPress={() => {
+                            setElectiveOptionId(elective.id);
+                            if (elective.id === "language") {
+                              setElectiveId(null);
+                            } else {
+                              setElectiveId(elective.id);
+                            }
+                            setForeignLanguageId(null);
+                            setErrors((previous) => {
+                              const next = { ...previous };
+                              delete next.elective;
+                              delete next.foreignLanguage;
+                              return next;
+                            });
+                          }}
+                          activeOpacity={0.8}
+                          style={[
+                            styles.choiceItem,
+                            electiveOptionId === elective.id && styles.choiceItemSelected,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.choiceText,
+                              electiveOptionId === elective.id && styles.choiceTextSelected,
+                            ]}
+                          >
+                            {elective.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {requiresForeignLanguage ? (
+                      <View style={styles.nestedChoice}>
+                        <Text style={styles.label}>اختر اللغة الأجنبية الثانية</Text>
+                        {errors.foreignLanguage ? (
+                          <Text style={styles.errorText}>{errors.foreignLanguage}</Text>
+                        ) : null}
+                        <View style={styles.choiceList}>
+                          {FOREIGN_LANGUAGES.map((language) => (
+                            <TouchableOpacity
+                              key={language.id}
+                              onPress={() => {
+                                setForeignLanguageId(language.id);
+                                setElectiveId(language.id);
+                                if (errors.foreignLanguage) {
+                                  setErrors((previous) => {
+                                    const next = { ...previous };
+                                    delete next.foreignLanguage;
+                                    return next;
+                                  });
+                                }
+                              }}
+                              activeOpacity={0.8}
+                              style={[
+                                styles.choiceItem,
+                                foreignLanguageId === language.id && styles.choiceItemSelected,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.choiceText,
+                                  foreignLanguageId === language.id && styles.choiceTextSelected,
+                                ]}
+                              >
+                                {language.name}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
 
             {showSections ? (
               <View style={styles.sectionWrapper}>
@@ -225,6 +409,30 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     backgroundColor: COLORS.border,
+  },
+  nestedChoice: { marginTop: 20 },
+  choiceList: { gap: 8 },
+  choiceItem: {
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+  },
+  choiceItemSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: "#EFF6FF",
+  },
+  choiceText: {
+    fontFamily: FONTS.regular,
+    fontSize: 15,
+    color: COLORS.textDark,
+    textAlign: "right",
+  },
+  choiceTextSelected: {
+    fontFamily: FONTS.bold,
+    color: COLORS.primary,
   },
   loginRow: {
     flexDirection: "row-reverse",

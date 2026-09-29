@@ -43,6 +43,17 @@ export default function Step3Screen() {
       return;
     }
 
+    if (
+      (data.gradeId === 5 && (!data.trackId || !data.electiveId)) ||
+      (data.gradeId === 6 && !data.sectionId)
+    ) {
+      Alert.alert(
+        "بيانات الدراسة ناقصة",
+        "ارجع للخطوة الأولى واختر المسار والمادة أو القسم المطلوب لصفك",
+      );
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await authService.register({
@@ -52,8 +63,12 @@ export default function Step3Screen() {
         password: data.password,
         gradeId: data.gradeId!,
         gradeName: data.gradeName,
+        trackId: data.trackId,
+        trackName: data.trackName || null,
+        electiveId: data.electiveId,
+        electiveName: data.electiveName || null,
         sectionId: data.sectionId,
-        sectionName: data.sectionName,
+        sectionName: data.sectionName || null,
         referralCode: referralCode || undefined,
       });
       // حفظ التوكن وبيانات المستخدم
@@ -120,7 +135,16 @@ export default function Step3Screen() {
             <InfoRow icon="person-outline" label="الاسم" value={data.fullName} />
             <InfoRow icon="call-outline" label="الموبايل" value={data.phone} />
             <InfoRow icon="school-outline" label="الصف" value={data.gradeName} />
-            {data.sectionName ? (
+            {data.trackId ? (
+              <>
+                <InfoRow
+                  icon="git-branch-outline"
+                  label="المسار"
+                  value={data.trackName}
+                />
+                <InfoRow icon="book-outline" label="المادة التخصصية" value={data.electiveName} />
+              </>
+            ) : data.sectionName ? (
               <InfoRow
                 icon="git-branch-outline"
                 label="القسم"

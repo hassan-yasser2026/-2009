@@ -1,4 +1,9 @@
 import { api } from "./api";
+import type {
+  ElectiveId,
+  SectionId,
+  TrackId,
+} from "../core/constants";
 
 export interface RegisterPayload {
   fullName: string;
@@ -7,7 +12,11 @@ export interface RegisterPayload {
   password: string;
   gradeId: number;
   gradeName: string;
-  sectionId: string | null;
+  trackId: TrackId | null;
+  trackName: string | null;
+  electiveId: ElectiveId | null;
+  electiveName: string | null;
+  sectionId: SectionId | null;
   sectionName: string | null;
   referralCode?: string;
 }
@@ -20,6 +29,10 @@ export interface AuthResponse {
     email: string;
     gradeId: number;
     gradeName: string;
+    trackId: string | null;
+    trackName: string | null;
+    electiveId: string | null;
+    electiveName: string | null;
     sectionId: string | null;
     sectionName: string;
     status: string;
