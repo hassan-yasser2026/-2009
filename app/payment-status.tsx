@@ -74,7 +74,7 @@ export default function PaymentStatusScreen() {
   useEffect(() => {
     if (!user) return;
     const accountIsActive = data?.user?.status === "active";
-    if (!isApproved && !accountIsActive) return;
+    if (!isApproved && (!accountIsActive || latestPayment)) return;
     setUser({
       ...user,
       status: "active",
@@ -90,6 +90,7 @@ export default function PaymentStatusScreen() {
     return () => clearTimeout(timeout);
   }, [
     data?.payments?.[0]?.status,
+    latestPayment?.id,
     data?.user?.status,
     data?.user?.subscriptionEnd,
     isApproved,
