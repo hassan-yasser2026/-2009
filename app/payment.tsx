@@ -64,8 +64,13 @@ export default function PaymentScreen() {
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        if (asset.file && asset.file.size > 5 * 1024 * 1024) {
+        const size = asset.file?.size ?? asset.fileSize;
+        if (size && size > 5 * 1024 * 1024) {
           setScreenshotError("حجم الصورة لازم يكون 5 ميجابايت أو أقل");
+          return;
+        }
+        if (asset.mimeType && !["image/jpeg", "image/png", "image/webp"].includes(asset.mimeType)) {
+          setScreenshotError("نوع الصورة لازم يكون JPG أو PNG أو WEBP");
           return;
         }
         setScreenshot(asset);

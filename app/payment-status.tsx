@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -184,6 +185,9 @@ export default function PaymentStatusScreen() {
                       : "في انتظار موافقة الأدمن"}
                   </Text>
                 </View>
+                {latestPayment.id ? (
+                  <Text style={styles.paymentId}>رقم الدفع: {latestPayment.id}</Text>
+                ) : null}
 
                 {latestPayment.reviewNote ? (
                   <>
@@ -191,6 +195,11 @@ export default function PaymentStatusScreen() {
                     <Text style={styles.noteLabel}>ملاحظة الأدمن:</Text>
                     <Text style={styles.noteText}>{latestPayment.reviewNote}</Text>
                   </>
+                ) : null}
+                {isRejected ? (
+                  <Text style={styles.tipsText}>
+                    نصيحة: ارفع صورة واضحة يظهر فيها رقم العملية والمبلغ والتاريخ بالكامل.
+                  </Text>
                 ) : null}
 
                 <View style={styles.divider} />
@@ -209,6 +218,15 @@ export default function PaymentStatusScreen() {
                 للدعم: {APP.supportPhone}
               </Text>
             </View>
+            {(isPending || isRejected) ? (
+              <TouchableOpacity
+                style={styles.whatsappBtn}
+                onPress={() => Linking.openURL(`https://wa.me/${APP.whatsapp}`)}
+              >
+                <Ionicons name="logo-whatsapp" size={20} color="#FFF" />
+                <Text style={styles.primaryBtnText}>تواصل مع الدعم على واتساب</Text>
+              </TouchableOpacity>
+            ) : null}
 
             {/* أزرار */}
             {!latestPayment ? (
@@ -301,6 +319,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textDark,
   },
+  paymentId: {
+    color: COLORS.textLight,
+    fontFamily: FONTS.regular,
+    fontSize: 12,
+    marginTop: 10,
+    textAlign: "right",
+  },
   divider: {
     height: 1,
     backgroundColor: COLORS.border,
@@ -319,6 +344,14 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     textAlign: "right",
     lineHeight: 22,
+  },
+  tipsText: {
+    color: COLORS.secondary,
+    fontFamily: FONTS.regular,
+    fontSize: 13,
+    lineHeight: 21,
+    marginTop: 12,
+    textAlign: "right",
   },
   helpText: {
     fontFamily: FONTS.regular,
@@ -376,5 +409,17 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     fontSize: 15,
     color: "#FFF",
+  },
+  whatsappBtn: {
+    alignItems: "center",
+    backgroundColor: "#16A34A",
+    borderRadius: 24,
+    flexDirection: "row-reverse",
+    gap: 8,
+    justifyContent: "center",
+    marginBottom: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    width: "100%",
   },
 });

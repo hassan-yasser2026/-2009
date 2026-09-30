@@ -16,6 +16,9 @@ import { COLORS, FONTS } from "../../src/core/constants";
 import { subjectService } from "../../src/services/subject.service";
 import { scheduleService } from "../../src/services/schedule.service";
 import { useAuthStore } from "../../src/store/authStore";
+import { LoadingState } from "../../src/components/LoadingState";
+import { ErrorState } from "../../src/components/ErrorState";
+import { EmptyState } from "../../src/components/EmptyState";
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -31,6 +34,7 @@ export default function HomeScreen() {
   const {
     data: subjects = [],
     isLoading,
+    isError: subjectsError,
     refetch,
     isRefetching,
   } = useQuery({
@@ -43,6 +47,16 @@ export default function HomeScreen() {
     ],
     queryFn: () => subjectService.getSubjects(),
     enabled: !!user,
+  });
+  const {
+    data: lastLecture,
+    isLoading: lastLectureLoading,
+    isError: lastLectureError,
+    refetch: refetchLastLecture,
+  } = useQuery({
+    queryKey: ["last-lecture"],
+    queryFn: subjectService.getLastLecture,
+    enabled: Boolean(user) && user?.status === "active",
   });
   const {
     data: todaySchedule = [],
@@ -64,8 +78,8 @@ export default function HomeScreen() {
   });
 
   const onRefresh = useCallback(() => {
-    void Promise.all([refetch(), refetchToday()]);
-  }, [refetch, refetchToday]);
+    void Promise.all([refetch(), refetchToday(), refetchLastLecture()]);
+  }, [refetch, refetchToday, refetchLastLecture]);
 
   const gradeName = user?.gradeName || "";
   const studentContext = [
@@ -96,6 +110,13 @@ export default function HomeScreen() {
               {user?.fullName?.split(" ")[0] || "طالب"}
             </Text>
             <Text style={styles.gradeName}>{studentContext}</Text>
+            <Text style={styles.dateText}>
+              {new Intl.DateTimeFormat("ar-EG", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              }).format(new Date())}
+            </Text>
           </View>
           <TouchableOpacity
             style={styles.notificationBtn}
@@ -107,6 +128,21 @@ export default function HomeScreen() {
               color={COLORS.textDark}
             />
           </TouchableOpacity>
+        </View>
+
+        {/* بطاقة الحالة */}
+        <View style={styles.statusCard}>
+          <View style={styles.statusLeft}>
+            <Text style={styles.statusLabel}>الاشتراك الشهري</Text>
+            <View style={styles.statusActive}>
+              <View style={styles.dot} />
+              <Text style={styles.statusActiveText}>نشط</Text>
+            </View>
+          </View>
+          <View style={styles.statusRight}>
+            <Text style={styles.daysNumber}>{calculateDaysLeft(user?.subscriptionEnd)}</Text>
+            <Text style={styles.daysLabel}>يوم متبقي</Text>
+          </View>
         </View>
 
         <View style={styles.todayCard}>
@@ -133,65 +169,38 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* بطاقة الحالة */}
-        <View style={styles.statusCard}>
-          <View style={styles.statusLeft}>
-            <Text style={styles.statusLabel}>الاشتراك الشهري</Text>
-            <View style={styles.statusActive}>
-              <View style={styles.dot} />
-              <Text style={styles.statusActiveText}>نشط</Text>
-            </View>
-          </View>
-          <View style={styles.statusRight}>
-            <Text style={styles.daysNumber}>{calculateDaysLeft(user?.subscriptionEnd)}</Text>
-            <Text style={styles.daysLabel}>يوم متبقي</Text>
-          </View>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>آخر محاضرة</Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.examsBanner}
-          activeOpacity={0.85}
-          onPress={() => router.push("/exams" as any)}
-        >
-          <View style={styles.examsIcon}>
-            <Ionicons name="document-text-outline" size={25} color="#FFF" />
-          </View>
-          <View style={styles.examsBannerText}>
-            <Text style={styles.examsTitle}>الامتحانات الإلكترونية</Text>
-            <Text style={styles.examsSubtitle}>شاهد الامتحانات المتاحة لصفك</Text>
-          </View>
-          <Ionicons name="chevron-back" size={20} color="#FFF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.resultsBanner}
-          activeOpacity={0.85}
-          onPress={() => router.push("/exams/results" as any)}
-        >
-          <View style={styles.examsIcon}>
-            <Ionicons name="trophy-outline" size={25} color="#FFF" />
-          </View>
-          <View style={styles.examsBannerText}>
-            <Text style={styles.examsTitle}>نتائجي</Text>
-            <Text style={styles.examsSubtitle}>راجع نتائج امتحاناتك السابقة</Text>
-          </View>
-          <Ionicons name="chevron-back" size={20} color="#FFF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.scheduleBanner}
-          activeOpacity={0.85}
-          onPress={() => router.push("/schedule" as any)}
-        >
-          <View style={styles.examsIcon}>
-            <Ionicons name="calendar-outline" size={25} color="#FFF" />
-          </View>
-          <View style={styles.examsBannerText}>
-            <Text style={styles.examsTitle}>الجدول الأسبوعي</Text>
-            <Text style={styles.examsSubtitle}>تابع مواعيد المواد خلال الأسبوع</Text>
-          </View>
-          <Ionicons name="chevron-back" size={20} color="#FFF" />
-        </TouchableOpacity>
+        {lastLectureLoading ? (
+          <LoadingState message="جارٍ تحميل آخر نشاط..." />
+        ) : lastLectureError ? (
+          <ErrorState message="تعذر تحميل آخر محاضرة" onRetry={() => refetchLastLecture()} />
+        ) : lastLecture ? (
+          <TouchableOpacity
+            style={styles.lastLectureCard}
+            onPress={() =>
+              router.push(
+                `/lecture/${lastLecture.id}?url=${encodeURIComponent(
+                  lastLecture.youtubeUrl
+                )}&title=${encodeURIComponent(lastLecture.title)}` as any
+              )
+            }
+          >
+            <View style={styles.lastLectureIcon}>
+              <Ionicons name="play" size={22} color="#FFF" />
+            </View>
+            <View style={styles.lastLectureText}>
+              <Text style={styles.lastLectureSubject}>{lastLecture.subjectName}</Text>
+              <Text style={styles.lastLectureTitle} numberOfLines={2}>
+                {lastLecture.title}
+              </Text>
+              <Text style={styles.continueText}>أكمل من هنا ←</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <EmptyState icon="play-circle-outline" message="ابدأ أول محاضرة ليظهر تقدمك هنا" />
+        )}
 
         {/* المواد */}
         <View style={styles.sectionHeader}>
@@ -200,18 +209,11 @@ export default function HomeScreen() {
         </View>
 
         {isLoading ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>جارٍ التحميل...</Text>
-          </View>
+          <LoadingState />
+        ) : subjectsError ? (
+          <ErrorState onRetry={() => refetch()} />
         ) : subjects.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Ionicons name="book-outline" size={60} color={COLORS.textLight} />
-            <Text style={styles.emptyTitle}>مفيش مواد لحد دلوقتي</Text>
-            <Text style={styles.emptyText}>
-              هيتم إضافة المواد قريبًا من قِبل الأدمن
-            </Text>
-          </View>
+          <EmptyState icon="book-outline" message="مفيش مواد لحد دلوقتي" />
         ) : (
           <View style={styles.subjectsGrid}>
             {subjects.map((subject) => (
@@ -289,6 +291,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.primary,
     marginTop: 2,
+    textAlign: "right",
+  },
+  dateText: {
+    color: COLORS.textLight,
+    fontFamily: FONTS.regular,
+    fontSize: 12,
+    marginTop: 4,
     textAlign: "right",
   },
   notificationBtn: {
@@ -383,6 +392,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "rgba(255,255,255,0.75)",
   },
+  lastLectureCard: {
+    alignItems: "center",
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row-reverse",
+    gap: 12,
+    marginBottom: 24,
+    padding: 16,
+  },
+  lastLectureIcon: {
+    alignItems: "center",
+    backgroundColor: COLORS.primary,
+    borderRadius: 26,
+    height: 52,
+    justifyContent: "center",
+    width: 52,
+  },
+  lastLectureText: { alignItems: "flex-end", flex: 1 },
+  lastLectureSubject: { color: COLORS.primary, fontFamily: FONTS.bold, fontSize: 12 },
+  lastLectureTitle: {
+    color: COLORS.textDark,
+    fontFamily: FONTS.bold,
+    fontSize: 15,
+    marginTop: 4,
+    textAlign: "right",
+  },
+  continueText: { color: COLORS.secondary, fontFamily: FONTS.bold, fontSize: 12, marginTop: 6 },
   examsBanner: {
     flexDirection: "row-reverse",
     alignItems: "center",

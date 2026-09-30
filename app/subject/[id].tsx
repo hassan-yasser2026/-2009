@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -16,6 +17,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { COLORS, FONTS } from "../../src/core/constants";
 import { subjectService, Lecture } from "../../src/services/subject.service";
 import { getErrorMessage } from "../../src/services/api";
+import { LoadingState } from "../../src/components/LoadingState";
+import { ErrorState } from "../../src/components/ErrorState";
+import { EmptyState } from "../../src/components/EmptyState";
+import { useProgressStore } from "../../src/store/progressStore";
 
 export default function SubjectScreen() {
   const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
@@ -24,6 +29,7 @@ export default function SubjectScreen() {
   const {
     data: lectures = [],
     isLoading,
+    isError,
     refetch,
     isRefetching,
   } = useQuery({
@@ -36,6 +42,22 @@ export default function SubjectScreen() {
     queryFn: () => subjectService.getProgress(id),
     enabled: !!id,
   });
+  const setProgress = useProgressStore((state) => state.setProgress);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "unviewed" | "viewed">("all");
+  useEffect(() => {
+    if (progressQuery.data && id) setProgress(id, progressQuery.data);
+  }, [id, progressQuery.data, setProgress]);
+  const visibleLectures = useMemo(() => {
+    const normalized = search.trim().toLowerCase();
+    return lectures.filter((lecture) => {
+      const matchesSearch =
+        !normalized || lecture.title.toLowerCase().includes(normalized);
+      const matchesFilter =
+        filter === "all" || (filter === "viewed" ? lecture.viewed : !lecture.viewed);
+      return matchesSearch && matchesFilter;
+    });
+  }, [filter, lectures, search]);
 
   const [expanded, setExpanded] = useState<string | null>(null);
   const openLecture = async (lecture: Lecture) => {
@@ -110,33 +132,58 @@ export default function SubjectScreen() {
         </View>
 
         {isLoading ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>جارٍ التحميل...</Text>
-          </View>
+          <LoadingState />
+        ) : isError ? (
+          <ErrorState onRetry={() => refetch()} />
         ) : lectures.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Ionicons name="videocam-off-outline" size={60} color={COLORS.textLight} />
-            <Text style={styles.emptyTitle}>مفيش محاضرات لحد دلوقتي</Text>
-            <Text style={styles.emptyText}>
-              هيتم إضافة المحاضرات قريبًا من قِبل الأدمن
-            </Text>
-          </View>
+          <EmptyState icon="videocam-off-outline" message="مفيش محاضرات لحد دلوقتي" />
         ) : (
-          <View style={styles.list}>
-            {lectures.map((lecture, index) => (
-              <LectureItem
-                key={lecture.id}
-                lecture={lecture}
-                index={index + 1}
-                isExpanded={expanded === lecture.id}
-                onViewLecture={() => openLecture(lecture)}
-                onToggle={() =>
-                  setExpanded(expanded === lecture.id ? null : lecture.id)
-                }
+          <>
+            <View style={styles.searchBox}>
+              <Ionicons name="search-outline" size={20} color={COLORS.textLight} />
+              <TextInput
+                value={search}
+                onChangeText={setSearch}
+                placeholder="ابحث في المحاضرات..."
+                placeholderTextColor={COLORS.textLight}
+                style={styles.searchInput}
               />
-            ))}
-          </View>
+            </View>
+            <View style={styles.filters}>
+              {([
+                ["all", "الكل"],
+                ["unviewed", "لم تُشاهد"],
+                ["viewed", "تمت مشاهدتها"],
+              ] as const).map(([value, label]) => (
+                <TouchableOpacity
+                  key={value}
+                  onPress={() => setFilter(value)}
+                  style={[styles.filter, filter === value && styles.filterActive]}
+                >
+                  <Text style={[styles.filterText, filter === value && styles.filterTextActive]}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.list}>
+              {visibleLectures.map((lecture, index) => (
+                <LectureItem
+                  key={lecture.id}
+                  lecture={lecture}
+                  index={index + 1}
+                  isExpanded={expanded === lecture.id}
+                  onViewLecture={() => openLecture(lecture)}
+                  onToggle={() =>
+                    setExpanded(expanded === lecture.id ? null : lecture.id)
+                  }
+                />
+              ))}
+            </View>
+            {visibleLectures.length === 0 ? (
+              <EmptyState icon="search-outline" message="مفيش محاضرات مطابقة للبحث" />
+            ) : null}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -282,6 +329,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 8,
   },
+  searchBox: {
+    alignItems: "center",
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row-reverse",
+    gap: 8,
+    marginBottom: 10,
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    color: COLORS.textDark,
+    flex: 1,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+    paddingVertical: 12,
+    textAlign: "right",
+  },
+  filters: { flexDirection: "row-reverse", gap: 8, marginBottom: 16 },
+  filter: {
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  filterActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  filterText: { color: COLORS.textLight, fontFamily: FONTS.regular, fontSize: 12 },
+  filterTextActive: { color: "#FFF", fontFamily: FONTS.bold },
   loadingBox: { paddingVertical: 60, alignItems: "center", gap: 12 },
   loadingText: {
     fontFamily: FONTS.regular,

@@ -28,6 +28,15 @@ export interface SubjectProgress {
   viewedLectureIds: string[];
 }
 
+export interface LastLecture {
+  id: string;
+  title: string;
+  subjectId: string;
+  subjectName: string;
+  viewedAt: string | null;
+  youtubeUrl: string;
+}
+
 export const subjectService = {
   async getSubjects(): Promise<Subject[]> {
     const { data } = await api.get<Subject[]>("/subjects");
@@ -46,5 +55,10 @@ export const subjectService = {
 
   async markViewed(lectureId: string): Promise<void> {
     await api.post(`/lectures/${lectureId}/view`);
+  },
+
+  async getLastLecture(): Promise<LastLecture | null> {
+    const { data } = await api.get<LastLecture | null>("/users/last-lecture");
+    return data;
   },
 };
