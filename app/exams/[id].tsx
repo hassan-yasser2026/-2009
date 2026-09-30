@@ -86,6 +86,11 @@ export default function ExamDetailsScreen() {
           <Text style={styles.subject}>{exam.subjectName}</Text>
           <Text style={styles.title}>{exam.title}</Text>
           {!!exam.description && <Text style={styles.body}>{exam.description}</Text>}
+          {exam.publicationAt ? (
+            <Text style={styles.body}>
+              موعد النشر: {new Date(exam.publicationAt).toLocaleString("ar-EG")}
+            </Text>
+          ) : null}
           <View style={styles.infoRow}>
             <Info label="المدة" value={`${exam.duration} دقيقة`} />
             <Info label="الأسئلة" value={String(exam.questionCount)} />

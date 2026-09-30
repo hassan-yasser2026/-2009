@@ -34,22 +34,46 @@ export default function HomeScreen() {
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["subjects", user?.gradeId, user?.sectionId],
+    queryKey: [
+      "subjects",
+      user?.gradeId,
+      user?.trackId,
+      user?.electiveId,
+      user?.sectionId,
+    ],
     queryFn: () => subjectService.getSubjects(),
     enabled: !!user,
   });
-  const { data: todaySchedule = [], isLoading: todayLoading } = useQuery({
-    queryKey: ["schedule", "today"],
+  const {
+    data: todaySchedule = [],
+    isLoading: todayLoading,
+    isRefetching: todayRefetching,
+    refetch: refetchToday,
+    isError: todayError,
+  } = useQuery({
+    queryKey: [
+      "schedule",
+      "today",
+      user?.gradeId,
+      user?.trackId,
+      user?.electiveId,
+      user?.sectionId,
+    ],
     queryFn: scheduleService.getToday,
-    enabled: user?.status === "active",
+    enabled: Boolean(user) && user?.status === "active",
   });
 
   const onRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    void Promise.all([refetch(), refetchToday()]);
+  }, [refetch, refetchToday]);
 
   const gradeName = user?.gradeName || "";
-  const sectionName = user?.sectionName || "";
+  const studentContext = [
+    gradeName,
+    user?.trackName,
+    user?.electiveName,
+    user?.sectionName,
+  ].filter(Boolean).join(" · ");
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -58,7 +82,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching}
+            refreshing={isRefetching || todayRefetching}
             onRefresh={onRefresh}
             colors={[COLORS.primary]}
           />
@@ -71,9 +95,7 @@ export default function HomeScreen() {
             <Text style={styles.userName} numberOfLines={1}>
               {user?.fullName?.split(" ")[0] || "طالب"}
             </Text>
-            <Text style={styles.gradeName}>
-              {gradeName} {sectionName ? `• ${sectionName}` : ""}
-            </Text>
+            <Text style={styles.gradeName}>{studentContext}</Text>
           </View>
           <TouchableOpacity
             style={styles.notificationBtn}
@@ -94,10 +116,15 @@ export default function HomeScreen() {
           </View>
           {todayLoading ? (
             <ActivityIndicator color={COLORS.primary} />
+          ) : todayError ? (
+            <Text style={styles.todayEmpty}>تعذر تحميل جدول اليوم. اسحب للتحديث.</Text>
           ) : todaySchedule.length > 0 ? (
             todaySchedule.map((item) => (
               <View key={item.id} style={styles.todayItem}>
-                <Text style={styles.todaySubject}>{item.subject.name}</Text>
+                <View style={styles.todayDetails}>
+                  <Text style={styles.todaySubject}>{item.subject.name}</Text>
+                  {item.note ? <Text style={styles.todayNote}>{item.note}</Text> : null}
+                </View>
                 <Text style={styles.todayTime}>{item.time || "موعد الحصة غير محدد"}</Text>
               </View>
             ))
@@ -305,8 +332,11 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+    gap: 12,
   },
+  todayDetails: { flex: 1, alignItems: "flex-end" },
   todaySubject: { fontFamily: FONTS.bold, color: COLORS.textDark, fontSize: 14 },
+  todayNote: { fontFamily: FONTS.regular, color: COLORS.textLight, fontSize: 12, textAlign: "right", marginTop: 2 },
   todayTime: { fontFamily: FONTS.regular, color: COLORS.textLight, fontSize: 13 },
   todayEmpty: {
     fontFamily: FONTS.regular,

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -35,9 +36,15 @@ const DAYS = [
 export default function ScheduleScreen() {
   const user = useAuthStore((state) => state.user);
   const query = useQuery({
-    queryKey: ["schedule", user?.gradeId, user?.sectionId],
+    queryKey: [
+      "schedule",
+      user?.gradeId,
+      user?.trackId,
+      user?.electiveId,
+      user?.sectionId,
+    ],
     queryFn: async () => (await api.get<ScheduleEntry[]>("/schedule")).data,
-    enabled: Boolean(user),
+    enabled: user?.status === "active",
   });
 
   useEffect(() => {
@@ -56,10 +63,24 @@ export default function ScheduleScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>الجدول الأسبوعي</Text>
         <Text style={styles.subtitle}>
-          {user?.gradeName}{user?.sectionName ? ` · ${user.sectionName}` : ""}
+          {[
+            user?.gradeName,
+            user?.trackName,
+            user?.electiveName,
+            user?.sectionName,
+          ].filter(Boolean).join(" · ")}
         </Text>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={query.isRefetching}
+            onRefresh={() => void query.refetch()}
+            colors={[COLORS.primary]}
+          />
+        }
+      >
         {query.isLoading ? (
           <ActivityIndicator size="large" color={COLORS.primary} />
         ) : query.isError ? (

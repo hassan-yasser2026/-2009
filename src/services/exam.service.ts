@@ -8,6 +8,7 @@ export interface ExamSummary {
   description: string | null;
   price: number;
   duration: number;
+  publicationAt: string | null;
   gradeId: number;
   sectionId: string | null;
   isPublished: boolean;
@@ -24,6 +25,7 @@ export interface ExamDetails {
   description: string | null;
   price: number;
   duration: number;
+  publicationAt?: string | null;
   questionCount: number;
   submission: { paid: boolean; submittedAt: string | null } | null;
   paymentStatus: "pending" | "approved" | "rejected" | null;

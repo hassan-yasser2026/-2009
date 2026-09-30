@@ -9,8 +9,12 @@ interface User {
   email: string;
   gradeId: number;
   gradeName: string;
+  trackId: string | null;
+  trackName: string | null;
+  electiveId: string | null;
+  electiveName: string | null;
   sectionId: string | null;
-  sectionName: string;
+  sectionName: string | null;
   status: string;
   subscriptionEnd?: string;
   referralCode: string;
