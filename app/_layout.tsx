@@ -74,7 +74,11 @@ export default function RootLayout() {
     const isLoginRoute = pathname === "/login";
 
     if (user?.status === "pending") {
-      if (pathname !== "/register/pending" && pathname !== "/payment") {
+      if (
+        pathname !== "/register/pending" &&
+        pathname !== "/payment" &&
+        pathname !== "/payment-status"
+      ) {
         router.replace("/register/pending" as any);
       }
       return;

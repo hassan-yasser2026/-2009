@@ -144,7 +144,7 @@ export default function PaymentStatusScreen() {
               {isRejected
                 ? "اترفضت، ارفع سكرين جديد"
                 : isPending
-                ? "قيد المراجعة ⏳"
+              ? "في انتظار موافقة الأدمن ⏳"
                 : isApproved
                 ? "تم القبول ✅"
                 : "في انتظار رفع الدفع"}
@@ -181,7 +181,7 @@ export default function PaymentStatusScreen() {
                       ? "مرفوض"
                       : isApproved
                       ? "تم القبول"
-                      : "قيد المراجعة"}
+                      : "في انتظار موافقة الأدمن"}
                   </Text>
                 </View>
 
@@ -211,7 +211,15 @@ export default function PaymentStatusScreen() {
             </View>
 
             {/* أزرار */}
-            {isRejected ? (
+            {!latestPayment ? (
+              <TouchableOpacity
+                style={styles.primaryBtn}
+                onPress={() => router.replace("/payment" as any)}
+              >
+                <Ionicons name="cloud-upload-outline" size={20} color="#FFF" />
+                <Text style={styles.primaryBtnText}>ارفع سكرين الدفع</Text>
+              </TouchableOpacity>
+            ) : isRejected ? (
               <TouchableOpacity
                 style={styles.primaryBtn}
                 onPress={() => router.replace("/payment" as any)}
