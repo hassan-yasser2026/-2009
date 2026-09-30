@@ -138,6 +138,12 @@ export default function HomeScreen() {
               <View style={styles.dot} />
               <Text style={styles.statusActiveText}>نشط</Text>
             </View>
+            {(user?.streak ?? 0) > 0 ? (
+              <View style={styles.streakCard}>
+                <Text style={styles.streakText}>🔥 {user?.streak} أيام متتالية</Text>
+                <Text style={styles.streakHint}>ادخل النهاردة عشان تحافظ على الـ streak</Text>
+              </View>
+            ) : null}
           </View>
           <View style={styles.statusRight}>
             <Text style={styles.daysNumber}>{calculateDaysLeft(user?.subscriptionEnd)}</Text>
@@ -403,6 +409,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 16,
   },
+  streakCard: { backgroundColor: "#FFF7ED", borderColor: "#FED7AA", borderRadius: 12, borderWidth: 1, marginBottom: 20, padding: 13 },
+  streakText: { color: "#C2410C", fontFamily: FONTS.bold, fontSize: 15, textAlign: "right" },
+  streakHint: { color: "#9A3412", fontFamily: FONTS.regular, fontSize: 12, marginTop: 3, textAlign: "right" },
   lastLectureIcon: {
     alignItems: "center",
     backgroundColor: COLORS.primary,

@@ -19,6 +19,9 @@ interface User {
   subscriptionEnd?: string;
   referralCode: string;
   referralCount?: number;
+  points?: number;
+  level?: number;
+  streak?: number;
 }
 
 interface AuthState {

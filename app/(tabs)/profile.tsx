@@ -15,16 +15,24 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { APP, COLORS, FONTS } from "../../src/core/constants";
 import { useAuthStore } from "../../src/store/authStore";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../src/services/api";
+import { LoadingState } from "../../src/components/LoadingState";
 
 export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const [showDetails, setShowDetails] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const pointsQuery = useQuery({
+    queryKey: ["points-and-badges"],
+    queryFn: async () => (await api.get<PointsData>("/users/points-and-badges")).data,
+  });
 
   const menuItems = [
     { icon: "person-outline", label: "البيانات الشخصية" },
     { icon: "gift-outline", label: "نظام الإحالة" },
+    { icon: "star-outline", label: "المفضلة" },
     { icon: "card-outline", label: "حالة الدفع" },
     { icon: "help-circle-outline", label: "المساعدة والدعم" },
     { icon: "log-out-outline", label: "تسجيل الخروج" },
@@ -50,6 +58,9 @@ export default function ProfileScreen() {
         return;
       case "حالة الدفع":
         router.push("/payment-status" as any);
+        return;
+      case "المفضلة":
+        router.push("/bookmarks" as any);
         return;
       case "المساعدة والدعم":
         try {
@@ -79,6 +90,19 @@ export default function ProfileScreen() {
           <View style={styles.avatar}>
             <Ionicons name="person" size={36} color={COLORS.primary} />
           </View>
+          {pointsQuery.isLoading ? <LoadingState message="جارٍ تحميل إنجازاتك..." /> : pointsQuery.data ? (
+            <>
+              <View style={styles.pointsCard}>
+                <View style={styles.pointsTop}><Text style={styles.level}>المستوى {pointsQuery.data.level}</Text><Text style={styles.points}>{pointsQuery.data.points} نقطة</Text></View>
+                <View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${Math.min(100, (pointsQuery.data.points % 100))}%` }]} /></View>
+                <Text style={styles.streak}>🔥 {pointsQuery.data.streak} أيام متتالية</Text>
+              </View>
+              <Text style={styles.badgesTitle}>🏅 شاراتي</Text>
+              <View style={styles.badges}>
+                {pointsQuery.data.achievements.length ? pointsQuery.data.achievements.map((badge) => <View key={badge.id} style={styles.badge}><Text style={styles.badgeIcon}>{badge.icon}</Text><Text style={styles.badgeName}>{badge.name}</Text></View>) : <Text style={styles.noBadges}>اجمع نقاطًا لتحصل على شاراتك الأولى</Text>}
+              </View>
+            </>
+          ) : null}
           <Text style={styles.name}>{user?.fullName || "طالب"}</Text>
           <Text style={styles.grade}>{user?.gradeName || ""}</Text>
         </View>
@@ -134,6 +158,8 @@ export default function ProfileScreen() {
   );
 }
 
+interface PointsData { points: number; level: number; streak: number; achievements: { id: string; name: string; icon: string }[] }
+
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <View style={styles.detailRow}>
@@ -167,6 +193,19 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginTop: 4,
   },
+  pointsCard: { backgroundColor: COLORS.primary, borderRadius: 18, marginBottom: 24, padding: 20 },
+  pointsTop: { alignItems: "center", flexDirection: "row-reverse", justifyContent: "space-between" },
+  level: { color: "#FFF", fontFamily: FONTS.extraBold, fontSize: 20 },
+  points: { color: "#FFF", fontFamily: FONTS.bold, fontSize: 16 },
+  levelTrack: { backgroundColor: "rgba(255,255,255,.25)", borderRadius: 5, height: 8, marginTop: 18, overflow: "hidden" },
+  levelFill: { backgroundColor: COLORS.secondary, borderRadius: 5, height: "100%" },
+  streak: { color: "#FFF", fontFamily: FONTS.bold, marginTop: 14, textAlign: "right" },
+  badgesTitle: { color: COLORS.textDark, fontFamily: FONTS.extraBold, fontSize: 18, marginBottom: 12, textAlign: "right" },
+  badges: { backgroundColor: COLORS.surface, borderColor: COLORS.border, borderRadius: 16, borderWidth: 1, flexDirection: "row-reverse", flexWrap: "wrap", gap: 12, marginBottom: 24, padding: 14 },
+  badge: { alignItems: "center", backgroundColor: "#FFFBEB", borderRadius: 12, minWidth: 90, padding: 10 },
+  badgeIcon: { fontSize: 26 },
+  badgeName: { color: COLORS.textDark, fontFamily: FONTS.bold, fontSize: 11, marginTop: 5, textAlign: "center" },
+  noBadges: { color: COLORS.textLight, fontFamily: FONTS.regular, padding: 8, textAlign: "right" },
   menu: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
