@@ -2,7 +2,7 @@
   "expo": {
     "name": "ذاكر صح",
     "slug": "hasan_platform",
-    "version": "1.0.3",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "hasanplatform",
@@ -11,11 +11,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.hasanplatform.app",
       "googleServicesFile": "./GoogleService-Info.plist",
-      "buildNumber": "3"
+      "buildNumber": "7"
     },
     "android": {
       "package": "com.hasanplatform.app",
-      "versionCode": 4,
+      "versionCode": 7,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
