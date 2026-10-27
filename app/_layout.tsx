@@ -42,7 +42,7 @@ export default function RootLayout() {
   }, [initialize]);
 
   useEffect(() => {
-    if (!initialized || user?.status !== "active") return;
+    if (!initialized || !user) return;
 
     let disposed = false;
     let unsubscribe: (() => void) | undefined;
@@ -72,6 +72,14 @@ export default function RootLayout() {
     const isTabsRoute = pathname.startsWith("/(tabs)") || pathname.startsWith("/home");
     const isRegistrationRoute = pathname.startsWith("/register");
     const isLoginRoute = pathname === "/login";
+    const subscriptionEnd = user?.subscriptionEnd
+      ? Date.parse(user.subscriptionEnd)
+      : null;
+    const subscriptionExpired =
+      user?.status === "active" &&
+      subscriptionEnd !== null &&
+      Number.isFinite(subscriptionEnd) &&
+      subscriptionEnd <= Date.now();
 
     if (user?.status === "pending") {
       if (
@@ -80,6 +88,17 @@ export default function RootLayout() {
         pathname !== "/payment-status"
       ) {
         router.replace("/register/pending" as any);
+      }
+      return;
+    }
+
+    if (subscriptionExpired) {
+      if (
+        pathname !== "/subscription-expired" &&
+        pathname !== "/payment" &&
+        pathname !== "/payment-status"
+      ) {
+        router.replace("/subscription-expired" as any);
       }
       return;
     }

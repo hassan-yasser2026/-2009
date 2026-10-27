@@ -100,6 +100,15 @@ export async function setupNotificationListeners(): Promise<() => void> {
     });
   });
   const openNotification = (data?: Record<string, unknown>) => {
+    if (data?.type === "subscription_expired") {
+      router.push("/payment" as never);
+      return;
+    }
+    if (data?.type === "payment_approved") {
+      router.push("/payment-status" as never);
+      return;
+    }
+
     const lectureId = data?.lectureId;
     const youtubeUrl = data?.youtubeUrl;
     if (typeof lectureId === "string" && typeof youtubeUrl === "string") {
