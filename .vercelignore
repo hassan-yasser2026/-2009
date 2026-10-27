@@ -1,0 +1,9 @@
+.git
+.vercel
+.expo
+.gradle
+node_modules
+android
+ios
+hasan-backend
+dist
